@@ -9,6 +9,7 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use('/api/session',require('./controllers/api/session'));
 app.use('/api/users',require('./controllers/api/users'));
+app.use('/api/users/cloud',require('./controllers/api/usersCloud'));
 app.use('/', require('./controllers/static'));
 
 

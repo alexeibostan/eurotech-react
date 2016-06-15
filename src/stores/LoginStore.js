@@ -37,6 +37,13 @@ class LoginStore extends BaseStore {
     get pass() {
         return this._pass;
     }
+    get userCloud() {
+        return this._userCloud;
+    }
+
+    get passCloud() {
+        return this._passCloud;
+    }
 
     isLoggedIn() {
         return !!this._user;

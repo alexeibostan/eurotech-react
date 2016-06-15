@@ -21,7 +21,6 @@ export default class Login extends React.Component {
     }
 
     handlePasswordChange(e) {
-
         this.setState({
             pass: e.target.value
         });
@@ -40,7 +39,6 @@ export default class Login extends React.Component {
         console.log(this.state.user);
         var showAlert = this.handleAlertShow.bind(this);
         e.preventDefault();
-        //location.href = '#/dashboard';
         Auth.login(this.state.user,this.state.pass).then(
             (response)=>{
                 console.log('Login Success' + JSON.stringify(response.data));
@@ -91,9 +89,14 @@ export default class Login extends React.Component {
                                     type="password"
                                     name="password" />
                             </div>
+                               
                             <Button type="submit" bsSize="large" bsStyle="success" block>Login</Button>
                         </fieldset>
+                        <FormControl.Static>
+                            <Button bsStyle="link" href="/#/registration">Registration</Button>
+                        </FormControl.Static>
                     </form>
+                    
                     <div className="login-alert-container">
                         {this.errorAlert}
                     </div>

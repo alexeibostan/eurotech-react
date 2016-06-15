@@ -2,11 +2,12 @@
  * Created by alexei on 24/05/16.
  */
 import axios from "axios";
-import  Config  from '../config';
+import Config  from '../config';
 
 class AuthService {
     constructor(){
     }
+    
 
     login(username,password){
       return  axios({
@@ -19,7 +20,7 @@ class AuthService {
             }
         })
     }
-
+    
 }
 
 export default new AuthService();
