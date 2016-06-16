@@ -23,6 +23,7 @@ class UserCloudStore extends BaseStore {
             case 'REMOVE_USER_CLOUD':
                 this._passCloud = null;
                 this._userCloud = null;
+                this._data = null;
                 this.emitChange();
                 break;
             case 'ADD_USER_CLOUD':

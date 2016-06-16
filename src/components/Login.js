@@ -4,6 +4,8 @@
 import React from 'react';
 import Auth from '../services/AuthService';
 import LoginActions from '../actions/LoginActions';
+import UserCloudActions from '../actions/UserCloudActions';
+import AlertCustomActions from '../actions/AlertCustomActions';
 import { Panel, FormControl, Button, Checkbox, Alert } from 'react-bootstrap';
 
 export default class Login extends React.Component {
@@ -41,7 +43,18 @@ export default class Login extends React.Component {
         e.preventDefault();
         Auth.login(this.state.user,this.state.pass).then(
             (response)=>{
-                console.log('Login Success' + JSON.stringify(response.data));
+                console.log('Login Success ' + JSON.stringify(response.data));
+                if (response.data.cloudPass && response.data.cloudUser) {
+                    UserCloudActions.add(response.data.cloudUser,response.data.cloudPass)
+                }
+                else {
+                    var alertOptions = {
+                        style: 'warning',
+                        strongMsg: 'Everyware Cloud User!',
+                        message: 'User from Everyware Cloud is not set to your account '
+                    };
+                    AlertCustomActions.setAlertOn(alertOptions);
+                }
                 LoginActions.loginUser(this.state.user,this.state.pass);
             },
 

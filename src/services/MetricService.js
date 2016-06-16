@@ -3,7 +3,7 @@
  */
 import axios from "axios";
 import Qs from 'qs';
-import  LoginStore from '../stores/LoginStore';
+import UserCloudStore from '../stores/UserCloudStore';
 import  Config  from '../config';
 
 class MetricService {
@@ -26,8 +26,8 @@ class MetricService {
                 return Qs.stringify(params);
             },
             auth:{
-                username: LoginStore.user,
-                password: LoginStore.pass
+                username: UserCloudStore.userCloud,
+                password: UserCloudStore.passCloud
             }
         })
     }
@@ -44,8 +44,8 @@ class MetricService {
                 return Qs.stringify(params);
             },
             auth:{
-                username: LoginStore.user,
-                password: LoginStore.pass
+                username: UserCloudStore.userCloud,
+                password: UserCloudStore.passCloud
             }
         })
     }

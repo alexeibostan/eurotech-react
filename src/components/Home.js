@@ -9,6 +9,7 @@ import Loader from 'react-loader';
 import HomeActions from '../actions/HomeActions';
 import AlertsService from '../services/AlertsService';
 import HomeStore from '../stores/HomeStore';
+import AlertCustom from './AlertCustom';
 import { PageHeader, Col, Row, Panel, DropdownButton,
          MenuItem, Glyphicon, ListGroup, ListGroupItem, Button } from 'react-bootstrap';
 export default AuthenticatedComponent(class Home extends React.Component {
@@ -55,6 +56,11 @@ export default AuthenticatedComponent(class Home extends React.Component {
     render() {
         return (
             <div>
+                <Row>
+                    <Col lg={12}>
+                        <AlertCustom/>
+                    </Col>
+                </Row>
                 <Row>
                     <Col lg={12}>
                         <PageHeader>Dashboard {this.props.user}</PageHeader>

@@ -2,7 +2,7 @@
  * Created by alexei on 03/06/16.
  */
 import axios from "axios";
-import  LoginStore from '../stores/LoginStore';
+import UserCloudStore from '../stores/UserCloudStore';
 import  Config  from '../config';
 
 class AlertsService {
@@ -14,8 +14,8 @@ class AlertsService {
             method: 'GET',
             url: Config.BASE_URL_CLOUD + '/alerts?limit=4',
             auth:{
-                username: LoginStore.user,
-                password: LoginStore.pass
+                username: UserCloudStore.userCloud,
+                password: UserCloudStore.passCloud
             }
         })
     }

@@ -7,7 +7,7 @@ import UserService from '../services/UserService';
 import AlertCustom from './AlertCustom';
 import AlertCustomActions from '../actions/AlertCustomActions';
 import UserCloudActions from '../actions/UserCloudActions';
-import { Button, Panel, FormGroup, ControlLabel, FormControl, Table } from "react-bootstrap";
+import { Button, ButtonToolbar, Panel, FormGroup, ControlLabel, FormControl, Table } from "react-bootstrap";
 
 export default class UserCloud extends React.Component {
     constructor(){
@@ -43,7 +43,7 @@ export default class UserCloud extends React.Component {
 
         UserService.verifyCloudUser(this.state.userCloud,this.state.passCloud).then(
             (response)=>{
-                UserService.setCoudUser(this.state.userCloud,this.state.passCloud).then(
+                UserService.setCloudUser(this.state.userCloud,this.state.passCloud).then(
                     (response)=>{
                         UserCloudActions.add(this.state.userCloud,this.state.passCloud);
                         var alertOptions = {
@@ -54,7 +54,6 @@ export default class UserCloud extends React.Component {
                         AlertCustomActions.setAlertOn(alertOptions);
                         UserService.getCloudUser(this.state.userCloud).then(
                             (response) => {
-                                console.log(response.data);
                                 UserCloudActions.getData(response.data);
                             },
                             (error) => {
@@ -65,7 +64,7 @@ export default class UserCloud extends React.Component {
                         console.error(JSON.stringify(error));
                     });
             },
-            (errror)=>{
+            (error)=>{
                 var alertOptions = {
                     style:'danger',
                     strongMsg: 'Everyware Cloud User Error!',
@@ -80,6 +79,18 @@ export default class UserCloud extends React.Component {
 
     handleRemoveUserCloud(){
         console.log('remove user cloud');
+        UserService.deleteCloudUser().then(
+            (response) => {
+                var alertOptions = {
+                    style:'success',
+                    strongMsg: 'Everyware Cloud User Dleted!',
+                    message: 'Deleted successfully the Everyware Cloud User'
+                };
+                UserCloudActions.remove();
+                AlertCustomActions.setAlertOn(alertOptions);
+            },
+            (error) => { console.error(JSON.stringify(error)); }
+        )
     }
 
     handlePassCloudChange(e){
@@ -91,6 +102,16 @@ export default class UserCloud extends React.Component {
 
     componentDidMount(){
         UserCloudStore.addChangeListener(this._onChange);
+        if (this.state.passCloud && this.state.userCloud){
+            UserService.getCloudUser(this.state.userCloud).then(
+                (response) => {
+                    UserCloudActions.getData(response.data);
+                },
+                (error) => {
+                    console.log(JSON.stringify(error));
+                });
+        }
+
     }
 
 
@@ -157,8 +178,10 @@ export default class UserCloud extends React.Component {
         return(
             <Panel header="User Everyware Cloud">
                 <div class="panel-body-custom">
-                    <Button onClick={this.handleAddUserCloud.bind(this)}>Add</Button>
-                    <Button onClick={this.handleRemoveUserCloud.bind(this)}>Remove</Button>
+                    <ButtonToolbar>
+                        <Button onClick={this.handleAddUserCloud.bind(this)}>Add</Button>
+                        <Button onClick={this.handleRemoveUserCloud.bind(this)}>Remove</Button>
+                    </ButtonToolbar>
                     <form>
                         <FormGroup controlId="formControlsUsernameCloud">
                             <ControlLabel>Username Cloud</ControlLabel>

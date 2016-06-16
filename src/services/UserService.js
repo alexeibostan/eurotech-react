@@ -24,7 +24,7 @@ class UserService {
         })
     }
 
-    setCoudUser(cloudUser,cloudPass){
+    setCloudUser(cloudUser,cloudPass){
         return  axios({
             method: 'POST',
             url: Config.BASE_URL_LOCAL + '/api/users/cloud',
@@ -33,6 +33,14 @@ class UserService {
                     cloudUser: cloudUser,
                     cloudPass: cloudPass
             }
+        })
+    }
+    deleteCloudUser(){
+        return  axios({
+            method: 'DELETE',
+            url: Config.BASE_URL_LOCAL + '/api/users/cloud',
+            headers: { 'Access-Control-Allow-Origin': 'http://localhost:8081', 'Access-Control-Allow-Credentials': 'true' },
+            data: { username: LoginStore.user }
         })
     }
 

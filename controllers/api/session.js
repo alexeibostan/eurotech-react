@@ -10,6 +10,8 @@ router.post('/',function(req,res,next){
     var credentials = auth(req);
     User.findOne({username: credentials.name })
         .select('password')
+        .select('cloudPassword')
+        .select('cloudUsername')
         .exec(function(err,user){
 
             if (err) {return next(err);}
@@ -21,8 +23,16 @@ router.post('/',function(req,res,next){
                 if (err) {return next(err);}
 
                 if (!valid) { return res.send(401);}
+                if (user.cloudPassword && user.cloudUsername){
+                    res.json({
+                        cloudPass: user.cloudPassword,
+                        cloudUser: user.cloudUsername
+                    });
+                }
 
-                res.send(201);
+                else {
+                    res.send(200);
+                }
 
             });
         })

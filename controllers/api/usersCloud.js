@@ -30,4 +30,27 @@ router.post('/',function(req,res,next){
 
 });
 
+router.delete('/',function(req,res,next){
+    var username = req.body.username;
+
+    User.findOne({username: username })
+        .exec(function(err,user) {
+
+            if (err) { return next(err); }
+
+            if (!user) { return res.send(401); }
+
+            user.cloudPassword = undefined;
+            user.cloudUsername = undefined;
+
+            user.save(function(err){
+                if (err) { return next(err); }
+                console.log('Cloud user deleted');
+                res.send(202);
+            })
+
+        });
+
+});
+
 module.exports = router;
