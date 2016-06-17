@@ -18,6 +18,11 @@
 
 }
 
+.panel-body-table {
+    max-height: 200px;
+    overflow-y: scroll;
+}
+
 .centre-chart{
     text-align: center;
 }

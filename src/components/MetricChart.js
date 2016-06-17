@@ -8,7 +8,7 @@ import MetricService from '../services/MetricService';
 import Loader from 'react-loader';
 import RangeDropDown from './RangeDropdown';
 import AlertCustomActions from '../actions/AlertCustomActions';
-import { Button, Panel, Alert } from 'react-bootstrap';
+import { Button, Panel, Table } from 'react-bootstrap';
 import { LineTooltip } from 'react-d3-tooltip';
 
 
@@ -85,10 +85,16 @@ export  default class MetricChart extends React.Component {
         return MetricChartStore.topic;
     }
 
+    getDate(time){
+        var date = new Date();
+        date.setTime(time);
+        return  (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear()+ " " +
+            date.getHours() + ":" + date.getMinutes();
+    }
+
     requestData(){
-        console.log(MetricChartStore.metricType);
         var alertData = {style:'danger',strongMsg:'Metric',message:'Metric type is invalid!'};
-        if (MetricChartStore.metricType == 'string'){
+        if (MetricChartStore.metricType == 'boolean'){
             AlertCustomActions.setAlertOn(alertData);
         }
         else {
@@ -155,40 +161,69 @@ export  default class MetricChart extends React.Component {
             var chart = function () {
                // console.log(this.state.data);
                 if (this.state.chartData.length !== 0) {
-                    var yDomain = this.getYDomain.bind(this);
-                    console.log(yDomain);
-                    return (
-                        <LineTooltip
-                            title= {this.state.title}
-                            data= {this.state.chartData}
-                            width= {this.state.width}
-                            height= {this.state.height}
-                            id= {this.state.id}
-                            margins= {this.state.margins}
-                            svgClassName= {this.state.svgClassName}
-                            titleClassName= {this.state.titleClassName}
-                            yAxisClassName= {this.state.yAxisClassName}
-                            xAxisClassName= {this.state.xAxisClassName}
-                            chartSeries= {this.state.chartSeries}
-                            showXAxis= {this.state.showXAxis}
-                            showYAxis= {this.state.showYAxis}
-                            x= {this.state.x}
-                            //xDomain= {d3.extent(this.state.chartData, function(d){ return x(d) })}
-                            xRange= {[0, this.state.width - this.state.margins.left - this.state.margins.right]}
-                            xScale= {this.state.xScale}
-                            xOrient= {this.state.xOrient}
-                            xTickOrient= {this.state.xTickOrient}
-                            xLabel = {this.state.xLabel}
-                            xLabelPosition = {this.state.xLabelPosition}
-                            y= {this.state.y}
-                            yOrient= {this.state.yOrient}
-                            yDomain= {yDomain(this.state.chartData)}
-                            yRange= {[this.state.height - this.state.margins.top - this.state.margins.bottom, 0]}
-                            yScale= {this.state.yScale}
-                            yTickOrient= {this.state.yTickOrient}
-                            categoricalColors= {this.state.categoricalColors}
-                        />
-                    )
+                    console.log(MetricChartStore.metricType);
+                    if (MetricChartStore.metricType == 'string') {
+                        var getDateFormat = this.getDate.bind(this);
+                        var tableRows = this.state.chartData.map((row)=>{
+                            return (
+                                <tr key={row.uuid} >
+                                    <td>{getDateFormat(row.timestamp)}</td>
+                                    <td>{row.value}</td>
+                                </tr>
+                            );
+                        });
+                        return (
+                            <div className="panel-body-table">
+                                <Table responsive hover  bordered>
+                                    <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>{this.state.chartSeries[0].name}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {tableRows}
+                                    </tbody>
+                                </Table>
+                            </div>
+                        );
+                    }
+                    else {
+                        var yDomain = this.getYDomain.bind(this);
+                        console.log(yDomain);
+                        return (
+                            <LineTooltip
+                                title={this.state.title}
+                                data={this.state.chartData}
+                                width={this.state.width}
+                                height={this.state.height}
+                                id={this.state.id}
+                                margins={this.state.margins}
+                                svgClassName={this.state.svgClassName}
+                                titleClassName={this.state.titleClassName}
+                                yAxisClassName={this.state.yAxisClassName}
+                                xAxisClassName={this.state.xAxisClassName}
+                                chartSeries={this.state.chartSeries}
+                                showXAxis={this.state.showXAxis}
+                                showYAxis={this.state.showYAxis}
+                                x={this.state.x}
+                                //xDomain= {d3.extent(this.state.chartData, function(d){ return x(d) })}
+                                xRange={[0, this.state.width - this.state.margins.left - this.state.margins.right]}
+                                xScale={this.state.xScale}
+                                xOrient={this.state.xOrient}
+                                xTickOrient={this.state.xTickOrient}
+                                xLabel={this.state.xLabel}
+                                xLabelPosition={this.state.xLabelPosition}
+                                y={this.state.y}
+                                yOrient={this.state.yOrient}
+                                yDomain={yDomain(this.state.chartData)}
+                                yRange={[this.state.height - this.state.margins.top - this.state.margins.bottom, 0]}
+                                yScale={this.state.yScale}
+                                yTickOrient={this.state.yTickOrient}
+                                categoricalColors={this.state.categoricalColors}
+                            />
+                        )
+                    }
                 }
             }.bind(this);
             return (

@@ -7,7 +7,7 @@ import MetricActions from '../actions/MetricActions';
 import MetricListStore from '../stores/MetricListStore';
 import MectricChartActions from '../actions/MetricChartActions';
 import Loader from 'react-loader';
-import { ListGroup, ListGroupItem, Checkbox } from 'react-bootstrap';
+import { ListGroup, ListGroupItem, Checkbox, Row, Col } from 'react-bootstrap';
 
 export default class MetricList extends React.Component{
     constructor() {
@@ -62,7 +62,14 @@ export default class MetricList extends React.Component{
         var listNodes = this.state.data.map((metricInfo) =>{
             return (
                 <ListGroupItem >
-                    <Checkbox onChange={this.handleCheckBox.bind(this,metricInfo.name,metricInfo.type)}>{metricInfo.name}</Checkbox>
+                    <Row>
+                        <Col lg={8} >
+                            <Checkbox onChange={this.handleCheckBox.bind(this,metricInfo.name,metricInfo.type)}>{metricInfo.name}</Checkbox>
+                        </Col>
+                        <Col lg={4} >
+                            <div className="pull-right text-muted small"><em>{metricInfo.type}</em></div>
+                        </Col>
+                    </Row>
                 </ListGroupItem>
             )
         });
