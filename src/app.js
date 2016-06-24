@@ -13,6 +13,7 @@ import Devices from './components/pages/Devices';
 import Charts from './components/pages/Charts';
 import Device from './components/pages/Device';
 import Profile from './components/pages/Profile';
+import Users from './components/pages/Users';
 
 var routes = (
     <Route path="/" component={Base}>
@@ -25,6 +26,7 @@ var routes = (
             <Route name="device" path="/device/:clientId" component={Device}/>
             <Route name="charts" path="/charts" component={Charts}/>
             <Route name="profile" path="/profile" component={Profile}/>
+            <Route name="users" path="/users" component={Users}/>
         </Route>
     </Route>
 );

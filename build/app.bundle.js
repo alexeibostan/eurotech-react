@@ -92,12 +92,11 @@
 
 	var _Profile2 = _interopRequireDefault(_Profile);
 
+	var _Users = __webpack_require__(653);
+
+	var _Users2 = _interopRequireDefault(_Users);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	/**
-	 * Created by alexei on 24/05/16.
-	 */
-
 
 	var routes = _react2.default.createElement(
 	    _reactRouter.Route,
@@ -112,9 +111,13 @@
 	        _react2.default.createElement(_reactRouter.Route, { name: 'devices', path: '/devices', component: _Devices2.default }),
 	        _react2.default.createElement(_reactRouter.Route, { name: 'device', path: '/device/:clientId', component: _Device2.default }),
 	        _react2.default.createElement(_reactRouter.Route, { name: 'charts', path: '/charts', component: _Charts2.default }),
-	        _react2.default.createElement(_reactRouter.Route, { name: 'profile', path: '/profile', component: _Profile2.default })
+	        _react2.default.createElement(_reactRouter.Route, { name: 'profile', path: '/profile', component: _Profile2.default }),
+	        _react2.default.createElement(_reactRouter.Route, { name: 'users', path: '/users', component: _Users2.default })
 	    )
-	);
+	); /**
+	    * Created by alexei on 24/05/16.
+	    */
+
 
 	var router = _react2.default.createElement(
 	    _reactRouter.Router,
@@ -46143,13 +46146,19 @@
 	                    ),
 	                    _react2.default.createElement(
 	                        _reactBootstrap.NavItem,
-	                        { eventKey: 2, href: '/#/devices' },
+	                        { eventKey: 3, href: '/#/devices' },
 	                        _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'phone' }),
 	                        ' Devices '
 	                    ),
 	                    _react2.default.createElement(
 	                        _reactBootstrap.NavItem,
-	                        { eventKey: 3, disabled: true },
+	                        { eventKey: 4, href: '/#/users' },
+	                        _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'user' }),
+	                        ' Users '
+	                    ),
+	                    _react2.default.createElement(
+	                        _reactBootstrap.NavItem,
+	                        { eventKey: 5, disabled: true },
 	                        'NavItem 3 content'
 	                    )
 	                )
@@ -79690,6 +79699,15 @@
 	    }
 
 	    _createClass(UserService, [{
+	        key: 'getAllUsers',
+	        value: function getAllUsers() {
+	            return (0, _axios2.default)({
+	                method: 'GET',
+	                url: _config2.default.BASE_URL_LOCAL + '/api/users',
+	                headers: { 'Access-Control-Allow-Origin': 'http://localhost:8081', 'Access-Control-Allow-Credentials': 'true' }
+	            });
+	        }
+	    }, {
 	        key: 'register',
 	        value: function register(username, password) {
 	            return (0, _axios2.default)({
@@ -79758,6 +79776,364 @@
 	}();
 
 	exports.default = new UserService();
+
+/***/ },
+/* 653 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _AuthenticatedComponent = __webpack_require__(530);
+
+	var _AuthenticatedComponent2 = _interopRequireDefault(_AuthenticatedComponent);
+
+	var _UserCloud = __webpack_require__(651);
+
+	var _UserCloud2 = _interopRequireDefault(_UserCloud);
+
+	var _AlertCustom = __webpack_require__(524);
+
+	var _AlertCustom2 = _interopRequireDefault(_AlertCustom);
+
+	var _UsersTable = __webpack_require__(654);
+
+	var _UsersTable2 = _interopRequireDefault(_UsersTable);
+
+	var _reactBootstrap = __webpack_require__(239);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by alexei on 24/06/16.
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+	exports.default = (0, _AuthenticatedComponent2.default)(function (_React$Component) {
+	    _inherits(Users, _React$Component);
+
+	    function Users() {
+	        _classCallCheck(this, Users);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(Users).call(this));
+	    }
+
+	    _createClass(Users, [{
+	        key: 'render',
+	        value: function render() {
+	            return _react2.default.createElement(
+	                'div',
+	                null,
+	                _react2.default.createElement(
+	                    _reactBootstrap.Col,
+	                    { lg: 12 },
+	                    _react2.default.createElement(
+	                        _reactBootstrap.PageHeader,
+	                        null,
+	                        ' Users '
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    _reactBootstrap.Col,
+	                    { lg: 12 },
+	                    _react2.default.createElement(_UsersTable2.default, null)
+	                )
+	            );
+	        }
+	    }]);
+
+	    return Users;
+	}(_react2.default.Component));
+
+/***/ },
+/* 654 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _UsersTableStore = __webpack_require__(655);
+
+	var _UsersTableStore2 = _interopRequireDefault(_UsersTableStore);
+
+	var _UserService = __webpack_require__(652);
+
+	var _UserService2 = _interopRequireDefault(_UserService);
+
+	var _UsersTableActions = __webpack_require__(656);
+
+	var _UsersTableActions2 = _interopRequireDefault(_UsersTableActions);
+
+	var _reactLoader = __webpack_require__(537);
+
+	var _reactLoader2 = _interopRequireDefault(_reactLoader);
+
+	var _reactBootstrap = __webpack_require__(239);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by alexei on 24/06/16.
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+	var UsersTable = function (_React$Component) {
+	    _inherits(UsersTable, _React$Component);
+
+	    function UsersTable() {
+	        _classCallCheck(this, UsersTable);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(UsersTable).call(this));
+
+	        _this.state = {
+	            data: _this.getDataState(),
+	            isLoaded: _this.getLoadedState()
+	        };
+	        _this._onChange = _this._onChange.bind(_this);
+	        return _this;
+	    }
+
+	    _createClass(UsersTable, [{
+	        key: 'getDataState',
+	        value: function getDataState() {
+	            return _UsersTableStore2.default.data;
+	        }
+	    }, {
+	        key: 'getLoadedState',
+	        value: function getLoadedState() {
+	            return _UsersTableStore2.default.isLoaded;
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            _UsersTableStore2.default.addChangeListener(this._onChange);
+
+	            if (this.state.data.length === 0) {
+	                _UserService2.default.getAllUsers().then(function (response) {
+	                    console.log(response.data);
+	                    _UsersTableActions2.default.getData(response.data.users);
+	                }, function (error) {
+	                    console.error(JSON.stringify(error));
+	                });
+	            }
+	        }
+	    }, {
+	        key: 'componentWillUnmount',
+	        value: function componentWillUnmount() {
+	            _UsersTableStore2.default.removeChangeListener(this._onChange);
+	        }
+	    }, {
+	        key: '_onChange',
+	        value: function _onChange() {
+	            this.setState({ data: this.getDataState() });
+	            this.setState({ isLoaded: this.getLoadedState() });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+
+	            var usersNodes = this.state.data.map(function (user) {
+	                return _react2.default.createElement(
+	                    'tr',
+	                    { key: user._id },
+	                    _react2.default.createElement(
+	                        'td',
+	                        null,
+	                        user.username
+	                    ),
+	                    _react2.default.createElement(
+	                        'td',
+	                        null,
+	                        user.roles
+	                    ),
+	                    _react2.default.createElement(
+	                        'td',
+	                        null,
+	                        user.cloudUsername
+	                    )
+	                );
+	            });
+
+	            return _react2.default.createElement(
+	                _reactBootstrap.Panel,
+	                { header: 'Users Table' },
+	                _react2.default.createElement(
+	                    _reactLoader2.default,
+	                    { loaded: this.state.isLoaded },
+	                    _react2.default.createElement(
+	                        _reactBootstrap.Table,
+	                        { responsive: true, hover: true, condensed: true },
+	                        _react2.default.createElement(
+	                            'thead',
+	                            null,
+	                            _react2.default.createElement(
+	                                'tr',
+	                                null,
+	                                _react2.default.createElement(
+	                                    'th',
+	                                    null,
+	                                    'Username'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'th',
+	                                    null,
+	                                    'Role'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'th',
+	                                    null,
+	                                    'User Cloud'
+	                                )
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'tbody',
+	                            null,
+	                            usersNodes
+	                        )
+	                    )
+	                )
+	            );
+	        }
+	    }]);
+
+	    return UsersTable;
+	}(_react2.default.Component);
+
+	exports.default = UsersTable;
+
+/***/ },
+/* 655 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _BaseStore2 = __webpack_require__(231);
+
+	var _BaseStore3 = _interopRequireDefault(_BaseStore2);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by alexei on 24/06/16.
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+	var UsersTableStore = function (_BaseStore) {
+	    _inherits(UsersTableStore, _BaseStore);
+
+	    function UsersTableStore() {
+	        _classCallCheck(this, UsersTableStore);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(UsersTableStore).call(this));
+
+	        _this.subscribe(function () {
+	            return _this._registerToActions.bind(_this);
+	        });
+	        _this._data = [];
+	        _this._isLoaded = false;
+	        return _this;
+	    }
+
+	    _createClass(UsersTableStore, [{
+	        key: '_registerToActions',
+	        value: function _registerToActions(action) {
+	            switch (action.actionType) {
+	                case 'USERS_GET':
+	                    this._data = action.data;
+	                    this._isLoaded = true;
+	                    this.emitChange();
+	                    break;
+	                case 'LOGOUT_USER':
+	                    this._data = [];
+	                    this._isLoaded = false;
+	                    this.emitChange();
+	                    break;
+	                default:
+	                    break;
+	            };
+	        }
+	    }, {
+	        key: 'data',
+	        get: function get() {
+	            return this._data;
+	        }
+	    }, {
+	        key: 'isLoaded',
+	        get: function get() {
+	            return this._isLoaded;
+	        }
+	    }]);
+
+	    return UsersTableStore;
+	}(_BaseStore3.default);
+
+	exports.default = new UsersTableStore();
+
+/***/ },
+/* 656 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _AppDispatcher = __webpack_require__(233);
+
+	var _AppDispatcher2 = _interopRequireDefault(_AppDispatcher);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = {
+	    getData: function getData(data) {
+	        _AppDispatcher2.default.dispatch({
+	            actionType: 'USERS_GET',
+	            data: data
+	        });
+	    }
+
+	}; /**
+	    * Created by alexei on 24/06/16.
+	    */
 
 /***/ }
 /******/ ]);

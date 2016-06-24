@@ -12,8 +12,9 @@ export default class SidebarMenu extends React.Component{
             <Nav bsStyle="pills" stacked  >
                 <NavItem eventKey={1} href='/#/dashboard'><Glyphicon glyph="dashboard" /> Dashboard </NavItem>
                 <NavItem eventKey={2} href='/#/charts' ><i class="fa fa-pie-chart" aria-hidden="true"/> Charts </NavItem>
-                <NavItem eventKey={2} href='/#/devices' ><Glyphicon glyph="phone" /> Devices </NavItem>
-                <NavItem eventKey={3} disabled>NavItem 3 content</NavItem>
+                <NavItem eventKey={3} href='/#/devices' ><Glyphicon glyph="phone" /> Devices </NavItem>
+                <NavItem eventKey={4} href='/#/users' ><Glyphicon glyph="user" /> Users </NavItem>
+                <NavItem eventKey={5} disabled>NavItem 3 content</NavItem>
             </Nav>
                 </div>
         );

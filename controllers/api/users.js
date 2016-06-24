@@ -42,4 +42,16 @@ router.post('/',function(req,res,next){
 
 });
 
+router.get('/',function(req,res,next){
+    User.find({})
+        .select('username')
+        .select('roles')
+        .select('cloudUsername')
+        .exec(function(err, users){
+        res.json({
+            users: users
+        });
+    });
+});
+
 module.exports = router;

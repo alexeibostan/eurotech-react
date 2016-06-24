@@ -9,7 +9,14 @@ import UserCloudStore from '../stores/UserCloudStore';
 class UserService {
     constructor(){
     }
-
+    
+    getAllUsers(){
+        return  axios({
+            method: 'GET',
+            url: Config.BASE_URL_LOCAL + '/api/users',
+            headers: { 'Access-Control-Allow-Origin': 'http://localhost:8081', 'Access-Control-Allow-Credentials': 'true' }
+        })
+    }
 
 
     register(username,password){
