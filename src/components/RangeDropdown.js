@@ -23,8 +23,8 @@ export default class RangeDropdown extends React.Component {
     }
 
     setRange(delta){
-        var nowMs = new Date().getTime();
-        var range;
+        const nowMs = new Date().getTime();
+        let range;
         if (delta === 0)
         {
             range = {
@@ -35,16 +35,15 @@ export default class RangeDropdown extends React.Component {
         else
         {
             range = {
-                startDate: nowMs - delta,
+                startDate: (nowMs - delta),
                 endDate: nowMs
             };
         }
-        console.log(range);
         MetricChartActions.setRequestDataRange(range);
     }
 
     handleSelectedValue(selectedValue) {
-        var deltaMs = 0;
+        let deltaMs = 0;
         switch (selectedValue){
             case 'Last Data':
                 this.setState({selectedValue: selectedValue});
@@ -68,13 +67,13 @@ export default class RangeDropdown extends React.Component {
                 break;
             case 'A Week Ago':
                 this.setState({selectedValue: selectedValue});
-                this.setState({selectedValue: selectedValue});
                 deltaMs = 7 * 24 * 60 * 60 * 1000; // week in 'ms'
                 this.setRange(deltaMs);
                 break;
             case 'A Month Ago':
                 deltaMs = 28 * 24 * 60 * 60 * 1000; // month in 'ms'
                 this.setState({selectedValue: selectedValue});
+                this.setRange(deltaMs);
                 break;
         }
 

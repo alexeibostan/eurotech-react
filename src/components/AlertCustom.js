@@ -45,10 +45,11 @@ export default class AlertCustom extends React.Component {
     render(){
         if (this.state.alertVisible) {
             return (
-
-                <Alert bsStyle={this.state.data.style} onDismiss={this.handleAlertDismiss.bind(this)}>
-                    <strong>{this.state.data.strongMsg}</strong> {this.state.data.message}
-                </Alert>
+                <div className="alert-custom">
+                    <Alert bsStyle={this.state.data.style} onDismiss={this.handleAlertDismiss.bind(this)}>
+                        <strong>{this.state.data.strongMsg}</strong> {this.state.data.message}
+                    </Alert>
+                </div>
             )
         }
         else { return null}

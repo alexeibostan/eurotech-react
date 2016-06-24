@@ -23,6 +23,26 @@
     overflow-y: scroll;
 }
 
+.button-metric-chart-left {
+    position: absolute;
+    top: 200px;
+    left: 15px;
+}
+
+.alert-custom {
+    z-index: 99999;
+    position: fixed;
+    top:10px;
+    right: 10px;
+
+}
+
+.button-metric-chart-right {
+    position: absolute;
+    top: 200px;
+    right: 15px;
+}
+
 .centre-chart{
     text-align: center;
 }

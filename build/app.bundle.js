@@ -47661,15 +47661,19 @@
 	        value: function render() {
 	            if (this.state.alertVisible) {
 	                return _react2.default.createElement(
-	                    _reactBootstrap.Alert,
-	                    { bsStyle: this.state.data.style, onDismiss: this.handleAlertDismiss.bind(this) },
+	                    'div',
+	                    { className: 'alert-custom' },
 	                    _react2.default.createElement(
-	                        'strong',
-	                        null,
-	                        this.state.data.strongMsg
-	                    ),
-	                    ' ',
-	                    this.state.data.message
+	                        _reactBootstrap.Alert,
+	                        { bsStyle: this.state.data.style, onDismiss: this.handleAlertDismiss.bind(this) },
+	                        _react2.default.createElement(
+	                            'strong',
+	                            null,
+	                            this.state.data.strongMsg
+	                        ),
+	                        ' ',
+	                        this.state.data.message
+	                    )
 	                );
 	            } else {
 	                return null;
@@ -77390,7 +77394,13 @@
 
 	    _createClass(MetricService, [{
 	        key: 'getMetricValuesByTimestamp',
-	        value: function getMetricValuesByTimestamp(topic, metric, metricType, startDate, endDate) {
+	        value: function getMetricValuesByTimestamp(topic, metric, metricType, startDate, endDate, limit, offset) {
+	            console.log('Start Date: ' + startDate);
+	            console.log('End Date: ' + endDate);
+	            console.log('Topic: ' + topic);
+	            console.log('Metric: ' + metric);
+	            console.log('limit: ' + limit);
+	            console.log('offset: ' + offset);
 	            return (0, _axios2.default)({
 	                method: 'GET',
 	                url: _config2.default.BASE_URL_CLOUD + '/metrics/valuesByTimestamp',
@@ -77400,7 +77410,8 @@
 	                    type: metricType,
 	                    startDate: startDate,
 	                    endDate: endDate,
-	                    limit: 250
+	                    limit: limit,
+	                    offset: offset
 	                },
 	                paramsSerializer: function paramsSerializer(params) {
 	                    return _qs2.default.stringify(params);
@@ -77987,10 +77998,21 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.default = {
+
 	    getDataMetricChart: function getDataMetricChart(data) {
 	        _AppDispatcher2.default.dispatch({
 	            actionType: 'DATA_CHART_GET',
 	            data: data
+	        });
+	    },
+	    incrementOffset: function incrementOffset() {
+	        _AppDispatcher2.default.dispatch({
+	            actionType: 'INCREMENT_OFFSET'
+	        });
+	    },
+	    decrementOffset: function decrementOffset() {
+	        _AppDispatcher2.default.dispatch({
+	            actionType: 'DECREMENT_OFFSET'
 	        });
 	    },
 	    setTopicSelected: function setTopicSelected(topic) {
@@ -78362,7 +78384,6 @@
 	        _this.state = {
 	            chartData: _this.getDataState(),
 	            isLoaded: _this.getLoadedState(),
-	            queryBool: _this.getQueryBoolState(),
 	            topic: _this.getTopicState(),
 	            width: 900,
 	            height: 300,
@@ -78442,17 +78463,51 @@
 	            return date.getMonth() + 1 + "-" + date.getDate() + "-" + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
 	        }
 	    }, {
+	        key: 'getNextData',
+	        value: function getNextData() {
+	            if (this.state.chartData.limitExceeded) {
+	                _MetricChartActions2.default.incrementOffset();
+	                console.log('Offset: ' + _MetricChartStrore2.default.offset);
+	                this.requestData();
+	            } else {
+	                var alertData = { style: 'danger', strongMsg: 'Data', message: 'Data is finished for this range!' };
+	                _AlertCustomActions2.default.setAlertOn(alertData);
+	            }
+	        }
+	    }, {
+	        key: 'getPrevData',
+	        value: function getPrevData() {
+	            if (_MetricChartStrore2.default.offset >= _MetricChartStrore2.default.limit) {
+	                _MetricChartActions2.default.decrementOffset();
+	                console.log('Offset: ' + _MetricChartStrore2.default.offset);
+	                this.requestData();
+	            } else {
+	                var alertData = { style: 'danger', strongMsg: 'Data', message: 'Data is finished for this range!' };
+	                _AlertCustomActions2.default.setAlertOn(alertData);
+	            }
+	        }
+	    }, {
 	        key: 'requestData',
 	        value: function requestData() {
+	            var _this2 = this;
+
 	            var alertData = { style: 'danger', strongMsg: 'Metric', message: 'Metric type is invalid!' };
 	            if (_MetricChartStrore2.default.metricType == 'boolean') {
 	                _AlertCustomActions2.default.setAlertOn(alertData);
 	            } else {
 
 	                _MetricChartActions2.default.getDataMetricChartClick();
-	                _MetricService2.default.getMetricValuesByTimestamp(_MetricChartStrore2.default.topic, _MetricChartStrore2.default.metric, _MetricChartStrore2.default.metricType, _MetricChartStrore2.default.range.startDate, _MetricChartStrore2.default.range.endDate).then(function (response) {
-	                    console.log(JSON.stringify(response.data));
-	                    _MetricChartActions2.default.getDataMetricChart(response.data.metricValue);
+	                _MetricService2.default.getMetricValuesByTimestamp(_MetricChartStrore2.default.topic, _MetricChartStrore2.default.metric, _MetricChartStrore2.default.metricType, _MetricChartStrore2.default.range.startDate, _MetricChartStrore2.default.range.endDate, _MetricChartStrore2.default.limit, _MetricChartStrore2.default.offset).then(function (response) {
+	                    console.log(JSON.stringify(response.data) + ' real_data ' + response.data.limitExceeded);
+
+	                    if (response.data.limitExceeded == 'false' && response.data.metricValue === undefined) {
+	                        alertData.strongMsg = 'Data';
+	                        alertData.message = 'No data is presented for this range!';
+	                        _AlertCustomActions2.default.setAlertOn(alertData);
+	                        _MetricChartActions2.default.getDataMetricChart(_this2.state.chartData);
+	                    } else {
+	                        _MetricChartActions2.default.getDataMetricChart(response.data);
+	                    }
 	                }, function (error) {
 	                    console.error(JSON.stringify(error));
 	                });
@@ -78461,10 +78516,8 @@
 	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
-
-	            console.log('Richiesta device chart');
-
 	            _MetricChartStrore2.default.addChangeListener(this._onChange);
+	            console.log('isLoadedState: ' + this.state);
 	        }
 	    }, {
 	        key: 'componentWillUnmount',
@@ -78475,7 +78528,6 @@
 	        key: '_onChange',
 	        value: function _onChange() {
 	            this.setState({ chartData: this.getDataState() });
-	            this.setState({ queryBool: this.getQueryBoolState() });
 	            this.setState({ isLoaded: this.getLoadedState() });
 	            this.setState({ chartSeries: [{ field: 'value', name: this.getChartSeriesNameState() }] });
 	            this.setState({ topic: this.getTopicState() });
@@ -78502,66 +78554,102 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            if (this.state.queryBool) {
-	                var chart = function () {
-	                    // console.log(this.state.data);
-	                    if (this.state.chartData.length !== 0) {
-	                        console.log(_MetricChartStrore2.default.metricType);
-	                        if (_MetricChartStrore2.default.metricType == 'string') {
-	                            var getDateFormat = this.getDate.bind(this);
-	                            var tableRows = this.state.chartData.map(function (row) {
-	                                return _react2.default.createElement(
-	                                    'tr',
-	                                    { key: row.uuid },
-	                                    _react2.default.createElement(
-	                                        'td',
-	                                        null,
-	                                        getDateFormat(row.timestamp)
-	                                    ),
-	                                    _react2.default.createElement(
-	                                        'td',
-	                                        null,
-	                                        row.value
-	                                    )
-	                                );
-	                            });
+
+	            var chart = function () {
+	                if (this.state.chartData) {
+	                    if (_MetricChartStrore2.default.metricType == 'string') {
+	                        var getDateFormat = this.getDate.bind(this);
+	                        var tableRows = this.state.chartData.metricValue.map(function (row) {
 	                            return _react2.default.createElement(
-	                                'div',
-	                                { className: 'panel-body-table' },
+	                                'tr',
+	                                { key: row.uuid },
 	                                _react2.default.createElement(
-	                                    _reactBootstrap.Table,
-	                                    { responsive: true, hover: true, bordered: true },
-	                                    _react2.default.createElement(
-	                                        'thead',
-	                                        null,
-	                                        _react2.default.createElement(
-	                                            'tr',
-	                                            null,
-	                                            _react2.default.createElement(
-	                                                'th',
-	                                                null,
-	                                                'Timestamp'
-	                                            ),
-	                                            _react2.default.createElement(
-	                                                'th',
-	                                                null,
-	                                                this.state.chartSeries[0].name
-	                                            )
-	                                        )
-	                                    ),
-	                                    _react2.default.createElement(
-	                                        'tbody',
-	                                        null,
-	                                        tableRows
-	                                    )
+	                                    'td',
+	                                    null,
+	                                    getDateFormat(row.timestamp)
+	                                ),
+	                                _react2.default.createElement(
+	                                    'td',
+	                                    null,
+	                                    row.value
 	                                )
 	                            );
-	                        } else {
-	                            var yDomain = this.getYDomain.bind(this);
-	                            console.log(yDomain);
-	                            return _react2.default.createElement(_reactD3Tooltip.LineTooltip, {
+	                        });
+	                        return _react2.default.createElement(
+	                            'div',
+	                            { className: 'panel-body-table' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'button-metric-chart-right' },
+	                                _react2.default.createElement(
+	                                    _reactBootstrap.Button,
+	                                    { onClick: this.getNextData.bind(this) },
+	                                    _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'menu-right' })
+	                                )
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'button-metric-chart-left' },
+	                                _react2.default.createElement(
+	                                    _reactBootstrap.Button,
+	                                    { onClick: this.getPrevData.bind(this) },
+	                                    _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'menu-left' })
+	                                )
+	                            ),
+	                            _react2.default.createElement(
+	                                _reactBootstrap.Table,
+	                                { responsive: true, hover: true, bordered: true },
+	                                _react2.default.createElement(
+	                                    'thead',
+	                                    null,
+	                                    _react2.default.createElement(
+	                                        'tr',
+	                                        null,
+	                                        _react2.default.createElement(
+	                                            'th',
+	                                            null,
+	                                            'Timestamp'
+	                                        ),
+	                                        _react2.default.createElement(
+	                                            'th',
+	                                            null,
+	                                            this.state.chartSeries[0].name
+	                                        )
+	                                    )
+	                                ),
+	                                _react2.default.createElement(
+	                                    'tbody',
+	                                    null,
+	                                    tableRows
+	                                )
+	                            )
+	                        );
+	                    } else {
+	                        var yDomain = this.getYDomain.bind(this);
+	                        return _react2.default.createElement(
+	                            'div',
+	                            null,
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'button-metric-chart-right' },
+	                                _react2.default.createElement(
+	                                    _reactBootstrap.Button,
+	                                    { onClick: this.getNextData.bind(this) },
+	                                    _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'menu-right' })
+	                                )
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'button-metric-chart-left' },
+	                                _react2.default.createElement(
+	                                    _reactBootstrap.Button,
+	                                    { onClick: this.getPrevData.bind(this) },
+	                                    _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'menu-left' })
+	                                )
+	                            ),
+	                            _react2.default.createElement(_reactD3Tooltip.LineTooltip, {
 	                                title: this.state.title,
-	                                data: this.state.chartData,
+	                                data: this.state.chartData.metricValue,
 	                                width: this.state.width,
 	                                height: this.state.height,
 	                                id: this.state.id,
@@ -78583,70 +78671,47 @@
 	                                xLabelPosition: this.state.xLabelPosition,
 	                                y: this.state.y,
 	                                yOrient: this.state.yOrient,
-	                                yDomain: yDomain(this.state.chartData),
+	                                yDomain: yDomain(this.state.chartData.metricValue),
 	                                yRange: [this.state.height - this.state.margins.top - this.state.margins.bottom, 0],
 	                                yScale: this.state.yScale,
 	                                yTickOrient: this.state.yTickOrient,
 	                                categoricalColors: this.state.categoricalColors
-	                            });
-	                        }
+	                            })
+	                        );
 	                    }
-	                }.bind(this);
-	                return _react2.default.createElement(
-	                    _reactBootstrap.Panel,
-	                    { header: _react2.default.createElement(
-	                            'span',
-	                            null,
-	                            _react2.default.createElement('i', { className: 'fa fa-area-chart', 'aria-hidden': 'true' }),
-	                            ' Topic: ',
-	                            this.state.topic,
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'pull-right' },
-	                                _react2.default.createElement(_RangeDropdown2.default, null),
-	                                _react2.default.createElement(
-	                                    _reactBootstrap.Button,
-	                                    { onClick: this.requestData.bind(this), bsSize: 'xsmall' },
-	                                    'Show Chart'
-	                                )
-	                            )
-	                        ) },
-	                    _react2.default.createElement(
-	                        _reactLoader2.default,
-	                        { loaded: this.state.isLoaded },
+	                } else {
+	                    return 'No data';
+	                }
+	            }.bind(this);
+	            return _react2.default.createElement(
+	                _reactBootstrap.Panel,
+	                { header: _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        _react2.default.createElement('i', { className: 'fa fa-area-chart', 'aria-hidden': 'true' }),
+	                        ' Topic: ',
+	                        this.state.topic,
 	                        _react2.default.createElement(
 	                            'div',
-	                            { className: 'centre-chart' },
-	                            chart()
-	                        )
-	                    )
-	                );
-	            } else {
-	                return _react2.default.createElement(
-	                    _reactBootstrap.Panel,
-	                    { header: _react2.default.createElement(
-	                            'span',
-	                            null,
-	                            _react2.default.createElement('i', { className: 'fa fa-area-chart', 'aria-hidden': 'true' }),
-	                            ' Metric Chart',
+	                            { className: 'pull-right' },
+	                            _react2.default.createElement(_RangeDropdown2.default, null),
 	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'pull-right' },
-	                                _react2.default.createElement(_RangeDropdown2.default, null),
-	                                _react2.default.createElement(
-	                                    _reactBootstrap.Button,
-	                                    { onClick: this.requestData.bind(this), bsSize: 'xsmall' },
-	                                    'Show Chart'
-	                                )
+	                                _reactBootstrap.Button,
+	                                { onClick: this.requestData.bind(this), bsSize: 'xsmall' },
+	                                'Show Chart'
 	                            )
-	                        ) },
+	                        )
+	                    ) },
+	                _react2.default.createElement(
+	                    _reactLoader2.default,
+	                    { loaded: this.state.isLoaded },
 	                    _react2.default.createElement(
 	                        'div',
-	                        null,
-	                        ' No data '
+	                        { className: 'centre-chart' },
+	                        chart()
 	                    )
-	                );
-	            }
+	                )
+	            );
 	        }
 	    }]);
 
@@ -78693,13 +78758,14 @@
 	        _this.subscribe(function () {
 	            return _this._registerToActions.bind(_this);
 	        });
-	        _this._data = [];
+	        _this._data = null;
 	        _this._range = null;
 	        _this._topic = null;
 	        _this._metric = null;
+	        _this._limit = 100;
+	        _this._offset = 0;
 	        _this._metricType = null;
-	        _this._queryBool = false;
-	        _this._isLoaded = false;
+	        _this._isLoaded = true;
 
 	        return _this;
 	    }
@@ -78708,6 +78774,12 @@
 	        key: '_registerToActions',
 	        value: function _registerToActions(action) {
 	            switch (action.actionType) {
+	                case 'INCREMENT_OFFSET':
+	                    this._offset += this._limit;
+	                    break;
+	                case 'DECREMENT_OFFSET':
+	                    this._offset -= this._limit;
+	                    break;
 	                case 'TOPIC_SELECTED':
 	                    this._topic = action.topic;
 	                    break;
@@ -78724,14 +78796,14 @@
 	                    this.emitChange();
 	                    break;
 	                case 'DATA_CHART_CLICK':
-	                    this._queryBool = true;
-	                    this._data = action.data = [];
 	                    this._isLoaded = false;
 	                    this.emitChange();
 	                    break;
 	                case 'LOGOUT_USER':
-	                    this._isLoaded = false;
-	                    this._data = [];
+	                    this._limit = 100;
+	                    this._offset = 0;
+	                    this._isLoaded = true;
+	                    this._data = null;
 	                    this._range = null;
 	                    this._topic = null;
 	                    this._metric = null;
@@ -78750,6 +78822,16 @@
 	        key: 'range',
 	        get: function get() {
 	            return this._range;
+	        }
+	    }, {
+	        key: 'offset',
+	        get: function get() {
+	            return this._offset;
+	        }
+	    }, {
+	        key: 'limit',
+	        get: function get() {
+	            return this._limit;
 	        }
 	    }, {
 	        key: 'metric',
@@ -78843,7 +78925,7 @@
 	        key: 'setRange',
 	        value: function setRange(delta) {
 	            var nowMs = new Date().getTime();
-	            var range;
+	            var range = void 0;
 	            if (delta === 0) {
 	                range = {
 	                    startDate: 0,
@@ -78855,7 +78937,6 @@
 	                    endDate: nowMs
 	                };
 	            }
-	            console.log(range);
 	            _MetricChartActions2.default.setRequestDataRange(range);
 	        }
 	    }, {
@@ -78885,13 +78966,13 @@
 	                    break;
 	                case 'A Week Ago':
 	                    this.setState({ selectedValue: selectedValue });
-	                    this.setState({ selectedValue: selectedValue });
 	                    deltaMs = 7 * 24 * 60 * 60 * 1000; // week in 'ms'
 	                    this.setRange(deltaMs);
 	                    break;
 	                case 'A Month Ago':
 	                    deltaMs = 28 * 24 * 60 * 60 * 1000; // month in 'ms'
 	                    this.setState({ selectedValue: selectedValue });
+	                    this.setRange(deltaMs);
 	                    break;
 	            }
 	        }

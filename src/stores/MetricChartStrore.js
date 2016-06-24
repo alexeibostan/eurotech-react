@@ -7,18 +7,25 @@ class MetricChartStrore extends BaseStore {
     constructor() {
         super();
         this.subscribe(() => this._registerToActions.bind(this));
-        this._data = [];
+        this._data = null;
         this._range = null;
         this._topic = null;
         this._metric = null;
+        this._limit = 100;
+        this._offset = 0;
         this._metricType = null;
-        this._queryBool = false;
-        this._isLoaded = false;
+        this._isLoaded = true;
 
     }
 
     _registerToActions(action){
         switch(action.actionType){
+            case 'INCREMENT_OFFSET':
+                this._offset += this._limit;
+                break;
+            case 'DECREMENT_OFFSET':
+                this._offset -= this._limit;
+                break;
             case 'TOPIC_SELECTED':
                 this._topic = action.topic;
                 break;
@@ -35,14 +42,14 @@ class MetricChartStrore extends BaseStore {
                 this.emitChange();
                 break;
             case 'DATA_CHART_CLICK':
-                this._queryBool = true;
-                this._data = action.data = [];
                 this._isLoaded = false;
                 this.emitChange();
                 break;
             case 'LOGOUT_USER':
-                this._isLoaded = false;
-                this._data = [];
+                this._limit = 100;
+                this._offset = 0;
+                this._isLoaded = true;
+                this._data = null;
                 this._range = null;
                 this._topic = null;
                 this._metric = null;
@@ -58,6 +65,13 @@ class MetricChartStrore extends BaseStore {
     }
     get range() {
         return this._range;
+    }
+
+    get offset() {
+        return this._offset;
+    }
+    get limit() {
+        return this._limit;
     }
 
     get metric() {

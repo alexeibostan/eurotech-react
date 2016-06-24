@@ -4,10 +4,21 @@
 import AppDistpatcher from '../dispatchers/AppDispatcher';
 
 export default {
+    
     getDataMetricChart: (data) => {
         AppDistpatcher.dispatch({
             actionType: 'DATA_CHART_GET',
             data: data
+        });
+    },
+    incrementOffset:() => {
+        AppDistpatcher.dispatch({
+            actionType: 'INCREMENT_OFFSET'
+        });
+    },
+    decrementOffset:() => {
+        AppDistpatcher.dispatch({
+            actionType: 'DECREMENT_OFFSET'
         });
     },
     setTopicSelected:(topic) => {

@@ -8,7 +8,7 @@ import MetricService from '../services/MetricService';
 import Loader from 'react-loader';
 import RangeDropDown from './RangeDropdown';
 import AlertCustomActions from '../actions/AlertCustomActions';
-import { Button, Panel, Table } from 'react-bootstrap';
+import { Button, Panel, Table, Glyphicon } from 'react-bootstrap';
 import { LineTooltip } from 'react-d3-tooltip';
 
 
@@ -19,7 +19,6 @@ export  default class MetricChart extends React.Component {
         this.state = {
             chartData: this.getDataState(),
             isLoaded: this.getLoadedState(),
-            queryBool:this.getQueryBoolState(),
             topic: this.getTopicState(),
             width : 900,
             height : 300,
@@ -92,6 +91,29 @@ export  default class MetricChart extends React.Component {
             date.getHours() + ":" + date.getMinutes();
     }
 
+    getNextData(){
+        if (this.state.chartData.limitExceeded){
+            MetricChartActions.incrementOffset();
+            console.log('Offset: ' + MetricChartStore.offset);
+            this.requestData();
+        }
+        else {
+            var alertData = {style:'danger',strongMsg:'Data',message:'Data is finished for this range!'};
+            AlertCustomActions.setAlertOn(alertData);
+        }
+    }
+    getPrevData(){
+        if (MetricChartStore.offset >= MetricChartStore.limit){
+            MetricChartActions.decrementOffset();
+            console.log('Offset: ' + MetricChartStore.offset);
+            this.requestData();
+        }
+        else {
+            var alertData = {style:'danger',strongMsg:'Data',message:'Data is finished for this range!'};
+            AlertCustomActions.setAlertOn(alertData);
+        }
+    }
+
     requestData(){
         var alertData = {style:'danger',strongMsg:'Metric',message:'Metric type is invalid!'};
         if (MetricChartStore.metricType == 'boolean'){
@@ -103,10 +125,21 @@ export  default class MetricChart extends React.Component {
             MetricService.getMetricValuesByTimestamp(MetricChartStore.topic,
                 MetricChartStore.metric,
                 MetricChartStore.metricType, MetricChartStore.range.startDate,
-                MetricChartStore.range.endDate).then(
+                MetricChartStore.range.endDate,MetricChartStore.limit,
+                MetricChartStore.offset).then(
                 (response) => {
-                    console.log(JSON.stringify(response.data));
-                    MetricChartActions.getDataMetricChart(response.data.metricValue);
+                    console.log(JSON.stringify(response.data) + ' real_data ' + response.data.limitExceeded );
+
+                        if(response.data.limitExceeded == 'false' && response.data.metricValue === undefined){
+                            alertData.strongMsg = 'Data';
+                            alertData.message = 'No data is presented for this range!';
+                            AlertCustomActions.setAlertOn(alertData);
+                            MetricChartActions.getDataMetricChart(this.state.chartData);
+                        }
+                        else {
+                            MetricChartActions.getDataMetricChart(response.data);
+                        }
+
                 },
                 (error) => {
                     console.error(JSON.stringify(error));
@@ -116,12 +149,8 @@ export  default class MetricChart extends React.Component {
     }
 
     componentDidMount() {
-
-        console.log('Richiesta device chart');
-
         MetricChartStore.addChangeListener(this._onChange);
-
-
+        console.log('isLoadedState: ' + this.state);
     }
 
     componentWillUnmount() {
@@ -130,7 +159,6 @@ export  default class MetricChart extends React.Component {
 
     _onChange() {
         this.setState({chartData: this.getDataState()});
-        this.setState({queryBool:this.getQueryBoolState()});
         this.setState({isLoaded: this.getLoadedState()});
         this.setState({chartSeries: [{field: 'value',name:this.getChartSeriesNameState()}]});
         this.setState({topic: this.getTopicState()});
@@ -157,75 +185,97 @@ export  default class MetricChart extends React.Component {
     
 
     render(){
-        if (this.state.queryBool) {
-            var chart = function () {
-               // console.log(this.state.data);
-                if (this.state.chartData.length !== 0) {
-                    console.log(MetricChartStore.metricType);
-                    if (MetricChartStore.metricType == 'string') {
-                        var getDateFormat = this.getDate.bind(this);
-                        var tableRows = this.state.chartData.map((row)=>{
-                            return (
-                                <tr key={row.uuid} >
-                                    <td>{getDateFormat(row.timestamp)}</td>
-                                    <td>{row.value}</td>
-                                </tr>
-                            );
-                        });
+
+        var chart = function () {
+            if (this.state.chartData) {
+                if (MetricChartStore.metricType == 'string') {
+                    var getDateFormat = this.getDate.bind(this);
+                    var tableRows = this.state.chartData.metricValue.map((row)=> {
                         return (
-                            <div className="panel-body-table">
-                                <Table responsive hover  bordered>
-                                    <thead>
-                                    <tr>
-                                        <th>Timestamp</th>
-                                        <th>{this.state.chartSeries[0].name}</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {tableRows}
-                                    </tbody>
-                                </Table>
-                            </div>
+                            <tr key={row.uuid}>
+                                <td>{getDateFormat(row.timestamp)}</td>
+                                <td>{row.value}</td>
+                            </tr>
                         );
-                    }
-                    else {
-                        var yDomain = this.getYDomain.bind(this);
-                        console.log(yDomain);
-                        return (
-                            <LineTooltip
-                                title={this.state.title}
-                                data={this.state.chartData}
-                                width={this.state.width}
-                                height={this.state.height}
-                                id={this.state.id}
-                                margins={this.state.margins}
-                                svgClassName={this.state.svgClassName}
-                                titleClassName={this.state.titleClassName}
-                                yAxisClassName={this.state.yAxisClassName}
-                                xAxisClassName={this.state.xAxisClassName}
-                                chartSeries={this.state.chartSeries}
-                                showXAxis={this.state.showXAxis}
-                                showYAxis={this.state.showYAxis}
-                                x={this.state.x}
-                                //xDomain= {d3.extent(this.state.chartData, function(d){ return x(d) })}
-                                xRange={[0, this.state.width - this.state.margins.left - this.state.margins.right]}
-                                xScale={this.state.xScale}
-                                xOrient={this.state.xOrient}
-                                xTickOrient={this.state.xTickOrient}
-                                xLabel={this.state.xLabel}
-                                xLabelPosition={this.state.xLabelPosition}
-                                y={this.state.y}
-                                yOrient={this.state.yOrient}
-                                yDomain={yDomain(this.state.chartData)}
-                                yRange={[this.state.height - this.state.margins.top - this.state.margins.bottom, 0]}
-                                yScale={this.state.yScale}
-                                yTickOrient={this.state.yTickOrient}
-                                categoricalColors={this.state.categoricalColors}
-                            />
-                        )
-                    }
+                    });
+                    return (
+                        <div className="panel-body-table">
+                            <div className="button-metric-chart-right">
+                                <Button  onClick={this.getNextData.bind(this)} >
+                                    <Glyphicon glyph="menu-right" />
+                                </Button>
+                            </div>
+                            <div className="button-metric-chart-left">
+                                <Button  onClick={this.getPrevData.bind(this)} >
+                                    <Glyphicon glyph="menu-left" />
+                                </Button>
+                            </div>
+                            <Table responsive hover bordered>
+                                <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>{this.state.chartSeries[0].name}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {tableRows}
+                                </tbody>
+                            </Table>
+                        </div>
+                    );
                 }
-            }.bind(this);
+                else {
+                    var yDomain = this.getYDomain.bind(this);
+                    return (
+                        <div>
+                            <div className="button-metric-chart-right">
+                                <Button  onClick={this.getNextData.bind(this)} >
+                                    <Glyphicon glyph="menu-right" />
+                                </Button>
+                            </div>
+                            <div className="button-metric-chart-left">
+                                <Button onClick={this.getPrevData.bind(this)} >
+                                    <Glyphicon glyph="menu-left" />
+                                </Button>
+                            </div>
+                        <LineTooltip
+                            title={this.state.title}
+                            data={this.state.chartData.metricValue}
+                            width={this.state.width}
+                            height={this.state.height}
+                            id={this.state.id}
+                            margins={this.state.margins}
+                            svgClassName={this.state.svgClassName}
+                            titleClassName={this.state.titleClassName}
+                            yAxisClassName={this.state.yAxisClassName}
+                            xAxisClassName={this.state.xAxisClassName}
+                            chartSeries={this.state.chartSeries}
+                            showXAxis={this.state.showXAxis}
+                            showYAxis={this.state.showYAxis}
+                            x={this.state.x}
+                            //xDomain= {d3.extent(this.state.chartData, function(d){ return x(d) })}
+                            xRange={[0, this.state.width - this.state.margins.left - this.state.margins.right]}
+                            xScale={this.state.xScale}
+                            xOrient={this.state.xOrient}
+                            xTickOrient={this.state.xTickOrient}
+                            xLabel={this.state.xLabel}
+                            xLabelPosition={this.state.xLabelPosition}
+                            y={this.state.y}
+                            yOrient={this.state.yOrient}
+                            yDomain={yDomain(this.state.chartData.metricValue)}
+                            yRange={[this.state.height - this.state.margins.top - this.state.margins.bottom, 0]}
+                            yScale={this.state.yScale}
+                            yTickOrient={this.state.yTickOrient}
+                            categoricalColors={this.state.categoricalColors}
+                        />
+                            </div>
+                    )
+                }
+            }
+            else {
+                return 'No data';
+            }
+        }.bind(this);
             return (
                 <Panel header={<span><i class="fa fa-area-chart" aria-hidden="true"/> Topic: {this.state.topic}
                      <div className="pull-right">
@@ -243,18 +293,6 @@ export  default class MetricChart extends React.Component {
                 </Panel>
             )
         }
-        else {
-            return (
-                <Panel header={<span><i class="fa fa-area-chart" aria-hidden="true"/> Metric Chart
-                     <div className="pull-right">
-                      <RangeDropDown/>
-                      <Button onClick={this.requestData.bind(this)} bsSize="xsmall" >Show Chart</Button>
-                      </div>
-                    </span>}>
-                    <div> No data </div>
-                </Panel>
-            )
-        }
 
-    }
+
 }
