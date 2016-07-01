@@ -25927,8 +25927,6 @@
 
 	var _LoginStore2 = _interopRequireDefault(_LoginStore);
 
-	var _reactRouter = __webpack_require__(168);
-
 	var _NavbarR = __webpack_require__(237);
 
 	var _NavbarR2 = _interopRequireDefault(_NavbarR);
@@ -25964,7 +25962,8 @@
 	        key: '_getLoginState',
 	        value: function _getLoginState() {
 	            return {
-	                userLoggedIn: _LoginStore2.default.isLoggedIn()
+	                userLoggedIn: _LoginStore2.default.isLoggedIn(),
+	                role: _LoginStore2.default.role
 	            };
 	        }
 	    }, {
@@ -25990,7 +25989,7 @@
 	                'div',
 	                null,
 	                _react2.default.createElement(_NavbarR2.default, null),
-	                _react2.default.createElement(_SidebarMenu2.default, null),
+	                _react2.default.createElement(_SidebarMenu2.default, { role: this.state.role }),
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'page-wrapper' },
@@ -26045,6 +26044,7 @@
 	        });
 	        _this._user = null;
 	        _this._pass = null;
+	        _this._role = null;
 	        return _this;
 	    }
 
@@ -26055,11 +26055,13 @@
 	                case 'LOGIN_USER':
 	                    this._pass = action.pass;
 	                    this._user = action.user;
+	                    this._role = action.role;
 	                    this.emitChange();
 	                    break;
 	                case 'LOGOUT_USER':
 	                    this._user = null;
 	                    this._pass = null;
+	                    this._role = null;
 	                    this.emitChange();
 	                    break;
 	                default:
@@ -26082,14 +26084,9 @@
 	            return this._pass;
 	        }
 	    }, {
-	        key: 'userCloud',
+	        key: 'role',
 	        get: function get() {
-	            return this._userCloud;
-	        }
-	    }, {
-	        key: 'passCloud',
-	        get: function get() {
-	            return this._passCloud;
+	            return this._role;
 	        }
 	    }]);
 
@@ -26946,13 +26943,12 @@
 	            userCloud: userCloud
 	        });
 	    },
-	    loginUser: function loginUser(user, pass, userCloud, passCloud) {
+	    loginUser: function loginUser(user, pass, role) {
 	        _AppDispatcher2.default.dispatch({
 	            actionType: 'LOGIN_USER',
 	            pass: pass,
 	            user: user,
-	            passCloud: passCloud,
-	            userCloud: userCloud
+	            role: role
 	        });
 
 	        _reactRouter.hashHistory.push('/dashboard');
@@ -46126,42 +46122,101 @@
 	    _createClass(SidebarMenu, [{
 	        key: 'render',
 	        value: function render() {
+	            var navItemNodes = function () {
+	                switch (this.props.role) {
+	                    case 'Client':
+	                        return _react2.default.createElement(
+	                            _reactBootstrap.Nav,
+	                            { bsStyle: 'pills', stacked: true },
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 1, href: '/#/dashboard' },
+	                                _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'dashboard' }),
+	                                ' Dashboard '
+	                            ),
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 2, href: '/#/charts' },
+	                                _react2.default.createElement('i', { className: 'fa fa-pie-chart', 'aria-hidden': 'true' }),
+	                                ' Charts '
+	                            ),
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 5, disabled: true },
+	                                'NavItem 3 content'
+	                            )
+	                        );
+	                        break;
+	                    case 'Manager':
+	                        return _react2.default.createElement(
+	                            _reactBootstrap.Nav,
+	                            { bsStyle: 'pills', stacked: true },
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 1, href: '/#/dashboard' },
+	                                _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'dashboard' }),
+	                                ' Dashboard '
+	                            ),
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 2, href: '/#/charts' },
+	                                _react2.default.createElement('i', { className: 'fa fa-pie-chart', 'aria-hidden': 'true' }),
+	                                ' Charts '
+	                            ),
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 3, href: '/#/devices' },
+	                                _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'phone' }),
+	                                ' Devices '
+	                            ),
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 5, disabled: true },
+	                                'NavItem 3 content'
+	                            )
+	                        );
+	                        break;
+	                    case 'Admin':
+	                        return _react2.default.createElement(
+	                            _reactBootstrap.Nav,
+	                            { bsStyle: 'pills', stacked: true },
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 1, href: '/#/dashboard' },
+	                                _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'dashboard' }),
+	                                ' Dashboard '
+	                            ),
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 2, href: '/#/charts' },
+	                                _react2.default.createElement('i', { className: 'fa fa-pie-chart', 'aria-hidden': 'true' }),
+	                                ' Charts '
+	                            ),
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 3, href: '/#/devices' },
+	                                _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'phone' }),
+	                                ' Devices '
+	                            ),
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 4, href: '/#/users' },
+	                                _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'user' }),
+	                                ' Users '
+	                            ),
+	                            _react2.default.createElement(
+	                                _reactBootstrap.NavItem,
+	                                { eventKey: 5, disabled: true },
+	                                'NavItem 3 content'
+	                            )
+	                        );
+	                        break;
+	                }
+	            }.bind(this);
 	            return _react2.default.createElement(
 	                'div',
 	                { className: 'sidebar sidebar-menu' },
-	                _react2.default.createElement(
-	                    _reactBootstrap.Nav,
-	                    { bsStyle: 'pills', stacked: true },
-	                    _react2.default.createElement(
-	                        _reactBootstrap.NavItem,
-	                        { eventKey: 1, href: '/#/dashboard' },
-	                        _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'dashboard' }),
-	                        ' Dashboard '
-	                    ),
-	                    _react2.default.createElement(
-	                        _reactBootstrap.NavItem,
-	                        { eventKey: 2, href: '/#/charts' },
-	                        _react2.default.createElement('i', { className: 'fa fa-pie-chart', 'aria-hidden': 'true' }),
-	                        ' Charts '
-	                    ),
-	                    _react2.default.createElement(
-	                        _reactBootstrap.NavItem,
-	                        { eventKey: 3, href: '/#/devices' },
-	                        _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'phone' }),
-	                        ' Devices '
-	                    ),
-	                    _react2.default.createElement(
-	                        _reactBootstrap.NavItem,
-	                        { eventKey: 4, href: '/#/users' },
-	                        _react2.default.createElement(_reactBootstrap.Glyphicon, { glyph: 'user' }),
-	                        ' Users '
-	                    ),
-	                    _react2.default.createElement(
-	                        _reactBootstrap.NavItem,
-	                        { eventKey: 5, disabled: true },
-	                        'NavItem 3 content'
-	                    )
-	                )
+	                navItemNodes()
 	            );
 	        }
 	    }]);
@@ -47913,7 +47968,7 @@
 	                    };
 	                    _AlertCustomActions2.default.setAlertOn(alertOptions);
 	                }
-	                _LoginActions2.default.loginUser(_this2.state.user, _this2.state.pass);
+	                _LoginActions2.default.loginUser(_this2.state.user, _this2.state.pass, response.data.role);
 	            }, function (error) {
 	                console.error('Login Error ' + JSON.stringify(error));
 	                showAlert();
@@ -48415,7 +48470,8 @@
 	                return {
 	                    userLoggedIn: _LoginStore2.default.isLoggedIn(),
 	                    user: _LoginStore2.default.user,
-	                    pass: _LoginStore2.default.pass
+	                    pass: _LoginStore2.default.pass,
+	                    role: _LoginStore2.default.role
 	                };
 	            }
 	        }, {
@@ -48450,6 +48506,7 @@
 	                return _react2.default.createElement(ComposedComponent, _extends({}, this.props, {
 	                    user: this.state.user,
 	                    pass: this.state.pass,
+	                    role: this.state.role,
 	                    userLoggedIn: this.state.userLoggedIn }));
 	            }
 	        }]);
@@ -79721,6 +79778,18 @@
 	            });
 	        }
 	    }, {
+	        key: 'updateRoleUser',
+	        value: function updateRoleUser(username, role) {
+	            return (0, _axios2.default)({
+	                method: 'PUT',
+	                url: _config2.default.BASE_URL_LOCAL + '/api/users',
+	                headers: { 'Access-Control-Allow-Origin': 'http://localhost:8081', 'Access-Control-Allow-Credentials': 'true' },
+	                data: { username: username,
+	                    role: role
+	                }
+	            });
+	        }
+	    }, {
 	        key: 'setCloudUser',
 	        value: function setCloudUser(cloudUser, cloudPass) {
 	            return (0, _axios2.default)({
@@ -79838,18 +79907,35 @@
 	                'div',
 	                null,
 	                _react2.default.createElement(
-	                    _reactBootstrap.Col,
-	                    { lg: 12 },
+	                    _reactBootstrap.Row,
+	                    null,
 	                    _react2.default.createElement(
-	                        _reactBootstrap.PageHeader,
-	                        null,
-	                        ' Users '
+	                        _reactBootstrap.Col,
+	                        { lg: 12 },
+	                        _react2.default.createElement(_AlertCustom2.default, null)
 	                    )
 	                ),
 	                _react2.default.createElement(
-	                    _reactBootstrap.Col,
-	                    { lg: 12 },
-	                    _react2.default.createElement(_UsersTable2.default, null)
+	                    _reactBootstrap.Row,
+	                    null,
+	                    _react2.default.createElement(
+	                        _reactBootstrap.Col,
+	                        { lg: 12 },
+	                        _react2.default.createElement(
+	                            _reactBootstrap.PageHeader,
+	                            null,
+	                            ' Users '
+	                        )
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    _reactBootstrap.Row,
+	                    null,
+	                    _react2.default.createElement(
+	                        _reactBootstrap.Col,
+	                        { lg: 12 },
+	                        _react2.default.createElement(_UsersTable2.default, null)
+	                    )
 	                )
 	            );
 	        }
@@ -79886,6 +79972,10 @@
 	var _UsersTableActions = __webpack_require__(656);
 
 	var _UsersTableActions2 = _interopRequireDefault(_UsersTableActions);
+
+	var _UserRoleDropdown = __webpack_require__(657);
+
+	var _UserRoleDropdown2 = _interopRequireDefault(_UserRoleDropdown);
 
 	var _reactLoader = __webpack_require__(537);
 
@@ -79971,7 +80061,7 @@
 	                    _react2.default.createElement(
 	                        'td',
 	                        null,
-	                        user.roles
+	                        _react2.default.createElement(_UserRoleDropdown2.default, { role: user.roles, username: user.username })
 	                    ),
 	                    _react2.default.createElement(
 	                        'td',
@@ -80134,6 +80224,123 @@
 	}; /**
 	    * Created by alexei on 24/06/16.
 	    */
+
+/***/ },
+/* 657 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _UserService = __webpack_require__(652);
+
+	var _UserService2 = _interopRequireDefault(_UserService);
+
+	var _AlertCustomActions = __webpack_require__(526);
+
+	var _AlertCustomActions2 = _interopRequireDefault(_AlertCustomActions);
+
+	var _reactBootstrap = __webpack_require__(239);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by alexei on 01/07/16.
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+	var UserRoleDropdown = function (_React$Component) {
+	    _inherits(UserRoleDropdown, _React$Component);
+
+	    function UserRoleDropdown() {
+	        _classCallCheck(this, UserRoleDropdown);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(UserRoleDropdown).call(this));
+
+	        _this.state = {
+	            selectedValue: ''
+	        };
+	        return _this;
+	    }
+
+	    _createClass(UserRoleDropdown, [{
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            if (this.state.selectedValue == '') {
+	                this.setState({ selectedValue: this.props.role });
+	            }
+	        }
+	    }, {
+	        key: 'updateUserRole',
+	        value: function updateUserRole(role) {
+	            _UserService2.default.updateRoleUser(this.props.username, role).then(function (response) {
+	                var alertOptions = { style: 'success',
+	                    strongMsg: 'User',
+	                    message: 'User updated successfuly!' };
+	                _AlertCustomActions2.default.setAlertOn(alertOptions);
+	            }, function (error) {
+	                console.error(JSON.stringify(error));
+	            });
+	        }
+	    }, {
+	        key: 'handleSelectedValue',
+	        value: function handleSelectedValue(selectedValue) {
+	            switch (selectedValue) {
+	                case 'Client':
+	                    this.setState({ selectedValue: selectedValue });
+	                    this.updateUserRole(selectedValue);
+	                    break;
+	                case 'Manager':
+	                    this.setState({ selectedValue: selectedValue });
+	                    this.updateUserRole(selectedValue);
+	                    break;
+	                case 'Admin':
+	                    this.setState({ selectedValue: selectedValue });
+	                    this.updateUserRole(selectedValue);
+	                    break;
+
+	            }
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var _this2 = this;
+
+	            var values = ['Client', 'Manager', 'Admin'];
+	            var menuItems = values.map(function (value, key) {
+	                return _react2.default.createElement(
+	                    _reactBootstrap.MenuItem,
+	                    { key: key, eventKey: key, onClick: _this2.handleSelectedValue.bind(_this2, value) },
+	                    value
+	                );
+	            });
+
+	            return _react2.default.createElement(
+	                _reactBootstrap.DropdownButton,
+	                { bsSize: 'xsmall', title: this.state.selectedValue, id: 'dropdown-size-extra-small' },
+	                menuItems
+	            );
+	        }
+	    }]);
+
+	    return UserRoleDropdown;
+	}(_react2.default.Component);
+
+	exports.default = UserRoleDropdown;
 
 /***/ }
 /******/ ]);

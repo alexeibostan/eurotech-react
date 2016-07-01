@@ -55,7 +55,7 @@ export default class Login extends React.Component {
                     };
                     AlertCustomActions.setAlertOn(alertOptions);
                 }
-                LoginActions.loginUser(this.state.user,this.state.pass);
+                LoginActions.loginUser(this.state.user,this.state.pass, response.data.role);
             },
 
             (error)=>{

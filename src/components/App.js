@@ -3,7 +3,6 @@
 //'use strict';
 import React from 'react';
 import LoginStore from '../stores/LoginStore'
-import { Route, Link } from 'react-router';
 import NavbarR from './NavbarR';
 import SidebarMenu from './SidebarMenu';
 
@@ -15,7 +14,8 @@ export default class App extends React.Component {
 
     _getLoginState() {
         return {
-            userLoggedIn: LoginStore.isLoggedIn()
+            userLoggedIn: LoginStore.isLoggedIn(),
+            role: LoginStore.role
         };
     }
 
@@ -36,7 +36,7 @@ export default class App extends React.Component {
         return (
             <div>
                 <NavbarR/>
-                <SidebarMenu />
+                <SidebarMenu role={this.state.role} />
                 <div className="page-wrapper">
                 {this.props.children}
                 </div>

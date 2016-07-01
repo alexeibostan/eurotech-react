@@ -31,6 +31,17 @@ class UserService {
         })
     }
 
+    updateRoleUser(username,role){
+        return  axios({
+            method: 'PUT',
+            url: Config.BASE_URL_LOCAL + '/api/users',
+            headers: { 'Access-Control-Allow-Origin': 'http://localhost:8081', 'Access-Control-Allow-Credentials': 'true' },
+            data: { username: username,
+                    role: role
+            }
+        })
+    }
+
     setCloudUser(cloudUser,cloudPass){
         return  axios({
             method: 'POST',

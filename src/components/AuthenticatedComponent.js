@@ -20,7 +20,8 @@ export default (ComposedComponent) => {
             return {
                 userLoggedIn: LoginStore.isLoggedIn(),
                 user: LoginStore.user,
-                pass: LoginStore.pass
+                pass: LoginStore.pass,
+                role: LoginStore.role
             };
         }
 
@@ -53,6 +54,7 @@ export default (ComposedComponent) => {
                         {...this.props}
                         user={this.state.user}
                         pass={this.state.pass}
+                        role={this.state.role}
                         userLoggedIn={this.state.userLoggedIn}/>
                 );
 

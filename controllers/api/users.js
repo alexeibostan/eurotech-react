@@ -54,4 +54,17 @@ router.get('/',function(req,res,next){
     });
 });
 
+router.put('/',function(req,res,next){
+    console.log('Username ' + req.body.username);
+    User.findOne({username: req.body.username}, function(err, user){
+
+        if (err) { return next(err); }
+        user.roles = req.body.role;
+        user.save(function(err) {
+            if (err) { return next(err); }
+            res.send(200);
+        });
+    });
+});
+
 module.exports = router;

@@ -12,6 +12,7 @@ router.post('/',function(req,res,next){
         .select('password')
         .select('cloudPassword')
         .select('cloudUsername')
+        .select('roles')
         .exec(function(err,user){
 
             if (err) {return next(err);}
@@ -25,6 +26,7 @@ router.post('/',function(req,res,next){
                 if (!valid) { return res.send(401);}
                 if (user.cloudPassword && user.cloudUsername){
                     res.json({
+                        role: user.roles,
                         cloudPass: user.cloudPassword,
                         cloudUser: user.cloudUsername
                     });

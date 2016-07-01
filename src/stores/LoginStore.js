@@ -11,6 +11,7 @@ class LoginStore extends BaseStore {
         this.subscribe(() => this._registerToActions.bind(this));
         this._user = null;
         this._pass = null;
+        this._role = null
     }
 
     _registerToActions(action) {
@@ -18,11 +19,13 @@ class LoginStore extends BaseStore {
             case 'LOGIN_USER':
                 this._pass = action.pass;
                 this._user = action.user;
+                this._role = action.role;
                 this.emitChange();
                 break;
             case 'LOGOUT_USER':
                 this._user = null;
                 this._pass = null;
+                this._role = null
                 this.emitChange();
                 break;
             default:
@@ -37,12 +40,9 @@ class LoginStore extends BaseStore {
     get pass() {
         return this._pass;
     }
-    get userCloud() {
-        return this._userCloud;
-    }
 
-    get passCloud() {
-        return this._passCloud;
+    get role() {
+        return this._role;
     }
 
     isLoggedIn() {

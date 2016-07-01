@@ -5,6 +5,7 @@ import React from 'react';
 import UsersTableStore from '../stores/UsersTableStore';
 import UserService from '../services/UserService';
 import UsersTableActions from '../actions/UsersTableActions';
+import UserRoleDropdown from './UserRoleDropdown';
 import Loader from 'react-loader';
 import { Table, Panel } from 'react-bootstrap';
 
@@ -63,7 +64,9 @@ export  default class UsersTable extends React.Component {
 
                 <tr key={user._id} >
                     <td>{user.username}</td>
-                    <td>{user.roles}</td>
+                    <td>
+                        <UserRoleDropdown role={user.roles} username={user.username}/>
+                    </td>
                     <td>{user.cloudUsername}</td>
                 </tr>
             )

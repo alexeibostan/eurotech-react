@@ -17,12 +17,21 @@ export default AuthenticatedComponent( class Users extends React.Component {
     render(){
         return (
             <div>
-                <Col lg={12}>
-                    <PageHeader> Users </PageHeader>
-                </Col>
-                <Col lg={12}>
-                   <UsersTable />
-                </Col>
+                <Row>
+                    <Col lg={12}>
+                        <AlertCustom />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col lg={12}>
+                        <PageHeader> Users </PageHeader>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col lg={12}>
+                        <UsersTable />
+                    </Col>
+                </Row>
             </div>
         )
     }
