@@ -6,6 +6,10 @@ import { Nav, NavItem, Glyphicon } from 'react-bootstrap';
 
 export default class SidebarMenu extends React.Component{
 
+    constructor(){
+        super();
+    }
+
     render(){
         var navItemNodes = function () {
             switch (this.props.role){

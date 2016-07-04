@@ -20,6 +20,10 @@ var user = db.Schema({
         enum:['Client','Manager','Admin'],
         default:'Client'
     },
+    defaultTopic: {
+        type: String,
+        default: 'None'
+    },
     cloudUsername: {
         type:String
     },

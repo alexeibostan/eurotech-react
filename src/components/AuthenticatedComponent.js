@@ -21,7 +21,8 @@ export default (ComposedComponent) => {
                 userLoggedIn: LoginStore.isLoggedIn(),
                 user: LoginStore.user,
                 pass: LoginStore.pass,
-                role: LoginStore.role
+                role: LoginStore.role,
+                defaultTopic: LoginStore.defaultTopic
             };
         }
 
@@ -55,6 +56,7 @@ export default (ComposedComponent) => {
                         user={this.state.user}
                         pass={this.state.pass}
                         role={this.state.role}
+                        defaultTopic={this.state.defaultTopic}
                         userLoggedIn={this.state.userLoggedIn}/>
                 );
 

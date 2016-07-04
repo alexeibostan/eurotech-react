@@ -17,12 +17,13 @@ export default {
             userCloud:userCloud
         });
     },
-    loginUser: (user,pass,role) => {
+    loginUser: (user,pass,role,defaultTopic) => {
         AppDispatcher.dispatch({
             actionType: 'LOGIN_USER',
             pass: pass,
             user: user,
-            role: role
+            role: role,
+            defaultTopic: defaultTopic
         });
 
         hashHistory.push('/dashboard');

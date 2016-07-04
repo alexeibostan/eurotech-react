@@ -8,6 +8,7 @@ import MetricService from '../services/MetricService';
 import MetricActions from '../actions/MetricActions';
 import MectricChartActions from '../actions/MetricChartActions';
 import TopicActions from '../actions/TopicActions';
+import AlertCustomActions from '../actions/AlertCustomActions';
 import Loader from 'react-loader';
 import { ListGroup, ListGroupItem } from 'react-bootstrap';
 
@@ -50,14 +51,45 @@ export default class TopicList extends React.Component{
         );
     }
 
+    filter(arrayData,topic){
+        var newArray = [];
+        for (var i = 0; i < arrayData.length; i++){
+            if (arrayData[i].topic == topic){
+                newArray.push(arrayData[i]);
+                break;
+            }
+        }
+        return newArray;
+    }
+
+
 
     componentDidMount() {
         TopicListStore.addChangeListener(this._onChange);
         if (this.state.data.length === 0){
             TopicService.getTopics().then(
                 (response) =>{
-                    TopicActions.getDataTopic(response.data.topicInfo);
-                    console.log('TopicInfo Recived');
+                    if (this.props.defaultTopic != 'None'){
+                        var dataArray = this.filter(response.data.topicInfo,this.props.defaultTopic);
+                        if(dataArray.length == 0){
+                            var alertOptions = {
+                                style:'warning',
+                                strongMsg: 'User Cloud',
+                                message: 'The Default Topic of this user is not present on this Everyware Cloud User! '
+                            };
+                            AlertCustomActions.setAlertOn(alertOptions);
+                        }
+                        else {
+                            MectricChartActions.setTopicSelected(dataArray[0].topic);
+                            this.requestMetrics(dataArray[0].topic);
+                            TopicActions.getDataTopic(dataArray);
+                        }
+                    }
+                    else{
+                        TopicActions.getDataTopic(response.data.topicInfo);
+                        MectricChartActions.setTopicSelected(response.data.topicInfo[0].topic);
+                        this.requestMetrics(response.data.topicInfo[0].topic);
+                    }
                 },
                 (error) => { console.error(JSON.stringify(error)); }
             );

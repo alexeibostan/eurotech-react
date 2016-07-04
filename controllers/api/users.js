@@ -47,6 +47,7 @@ router.get('/',function(req,res,next){
         .select('username')
         .select('roles')
         .select('cloudUsername')
+        .select('defaultTopic')
         .exec(function(err, users){
         res.json({
             users: users
@@ -59,7 +60,7 @@ router.put('/',function(req,res,next){
     User.findOne({username: req.body.username}, function(err, user){
 
         if (err) { return next(err); }
-        user.roles = req.body.role;
+        user[req.body.field] = req.body.value;
         user.save(function(err) {
             if (err) { return next(err); }
             res.send(200);

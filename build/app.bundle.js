@@ -26045,6 +26045,7 @@
 	        _this._user = null;
 	        _this._pass = null;
 	        _this._role = null;
+	        _this._defaultTopic = null;
 	        return _this;
 	    }
 
@@ -26056,12 +26057,14 @@
 	                    this._pass = action.pass;
 	                    this._user = action.user;
 	                    this._role = action.role;
+	                    this._defaultTopic = action.defaultTopic;
 	                    this.emitChange();
 	                    break;
 	                case 'LOGOUT_USER':
 	                    this._user = null;
 	                    this._pass = null;
 	                    this._role = null;
+	                    this._defaultTopic = null;
 	                    this.emitChange();
 	                    break;
 	                default:
@@ -26077,6 +26080,11 @@
 	        key: 'user',
 	        get: function get() {
 	            return this._user;
+	        }
+	    }, {
+	        key: 'defaultTopic',
+	        get: function get() {
+	            return this._defaultTopic;
 	        }
 	    }, {
 	        key: 'pass',
@@ -26943,12 +26951,13 @@
 	            userCloud: userCloud
 	        });
 	    },
-	    loginUser: function loginUser(user, pass, role) {
+	    loginUser: function loginUser(user, pass, role, defaultTopic) {
 	        _AppDispatcher2.default.dispatch({
 	            actionType: 'LOGIN_USER',
 	            pass: pass,
 	            user: user,
-	            role: role
+	            role: role,
+	            defaultTopic: defaultTopic
 	        });
 
 	        _reactRouter.hashHistory.push('/dashboard');
@@ -46116,7 +46125,7 @@
 	    function SidebarMenu() {
 	        _classCallCheck(this, SidebarMenu);
 
-	        return _possibleConstructorReturn(this, Object.getPrototypeOf(SidebarMenu).apply(this, arguments));
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(SidebarMenu).call(this));
 	    }
 
 	    _createClass(SidebarMenu, [{
@@ -47968,7 +47977,7 @@
 	                    };
 	                    _AlertCustomActions2.default.setAlertOn(alertOptions);
 	                }
-	                _LoginActions2.default.loginUser(_this2.state.user, _this2.state.pass, response.data.role);
+	                _LoginActions2.default.loginUser(_this2.state.user, _this2.state.pass, response.data.role, response.data.defaultTopic);
 	            }, function (error) {
 	                console.error('Login Error ' + JSON.stringify(error));
 	                showAlert();
@@ -48471,7 +48480,8 @@
 	                    userLoggedIn: _LoginStore2.default.isLoggedIn(),
 	                    user: _LoginStore2.default.user,
 	                    pass: _LoginStore2.default.pass,
-	                    role: _LoginStore2.default.role
+	                    role: _LoginStore2.default.role,
+	                    defaultTopic: _LoginStore2.default.defaultTopic
 	                };
 	            }
 	        }, {
@@ -48507,6 +48517,7 @@
 	                    user: this.state.user,
 	                    pass: this.state.pass,
 	                    role: this.state.role,
+	                    defaultTopic: this.state.defaultTopic,
 	                    userLoggedIn: this.state.userLoggedIn }));
 	            }
 	        }]);
@@ -77082,7 +77093,7 @@
 	                            _react2.default.createElement(
 	                                'div',
 	                                { className: 'panel-body-custom' },
-	                                _react2.default.createElement(_TopicList2.default, null)
+	                                _react2.default.createElement(_TopicList2.default, { defaultTopic: this.props.defaultTopic })
 	                            )
 	                        )
 	                    ),
@@ -77157,6 +77168,10 @@
 
 	var _TopicActions2 = _interopRequireDefault(_TopicActions);
 
+	var _AlertCustomActions = __webpack_require__(526);
+
+	var _AlertCustomActions2 = _interopRequireDefault(_AlertCustomActions);
+
 	var _reactLoader = __webpack_require__(537);
 
 	var _reactLoader2 = _interopRequireDefault(_reactLoader);
@@ -77221,13 +77236,44 @@
 	            });
 	        }
 	    }, {
+	        key: 'filter',
+	        value: function filter(arrayData, topic) {
+	            var newArray = [];
+	            for (var i = 0; i < arrayData.length; i++) {
+	                if (arrayData[i].topic == topic) {
+	                    newArray.push(arrayData[i]);
+	                    break;
+	                }
+	            }
+	            return newArray;
+	        }
+	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
+	            var _this2 = this;
+
 	            _TopicListStore2.default.addChangeListener(this._onChange);
 	            if (this.state.data.length === 0) {
 	                _TopicService2.default.getTopics().then(function (response) {
-	                    _TopicActions2.default.getDataTopic(response.data.topicInfo);
-	                    console.log('TopicInfo Recived');
+	                    if (_this2.props.defaultTopic != 'None') {
+	                        var dataArray = _this2.filter(response.data.topicInfo, _this2.props.defaultTopic);
+	                        if (dataArray.length == 0) {
+	                            var alertOptions = {
+	                                style: 'warning',
+	                                strongMsg: 'User Cloud',
+	                                message: 'The Default Topic of this user is not present on this Everyware Cloud User! '
+	                            };
+	                            _AlertCustomActions2.default.setAlertOn(alertOptions);
+	                        } else {
+	                            _MetricChartActions2.default.setTopicSelected(dataArray[0].topic);
+	                            _this2.requestMetrics(dataArray[0].topic);
+	                            _TopicActions2.default.getDataTopic(dataArray);
+	                        }
+	                    } else {
+	                        _TopicActions2.default.getDataTopic(response.data.topicInfo);
+	                        _MetricChartActions2.default.setTopicSelected(response.data.topicInfo[0].topic);
+	                        _this2.requestMetrics(response.data.topicInfo[0].topic);
+	                    }
 	                }, function (error) {
 	                    console.error(JSON.stringify(error));
 	                });
@@ -77247,13 +77293,13 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            var _this2 = this;
+	            var _this3 = this;
 
 	            var listNodes = this.state.data.map(function (topicInfo) {
-	                var date = _this2.getDate.bind(_this2);
+	                var date = _this3.getDate.bind(_this3);
 	                return _react2.default.createElement(
 	                    _reactBootstrap.ListGroupItem,
-	                    { onClick: _this2.requestMetrics.bind(_this2, topicInfo.topic) },
+	                    { onClick: _this3.requestMetrics.bind(_this3, topicInfo.topic) },
 	                    topicInfo.topic,
 	                    _react2.default.createElement(
 	                        'span',
@@ -78222,16 +78268,6 @@
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
 	            _MetricListStore2.default.addChangeListener(this._onChange);
-	            if (this.state.data.length === 0) {
-	                var topic = 'demo_PCN/+/#';
-	                _MetricService2.default.getMetrics(topic).then(function (response) {
-	                    _MetricActions2.default.getDataMetric(response.data.metricInfo);
-	                    _MetricChartActions2.default.setTopicSelected(topic);
-	                    console.log('MetricInfo Recived');
-	                }, function (error) {
-	                    console.error(JSON.stringify(error));
-	                });
-	            }
 	        }
 	    }, {
 	        key: 'componentWillUnmount',
@@ -78247,40 +78283,46 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            var _this2 = this;
+	            var listNodes = function () {
+	                var _this2 = this;
 
-	            var listNodes = this.state.data.map(function (metricInfo) {
-	                return _react2.default.createElement(
-	                    _reactBootstrap.ListGroupItem,
-	                    null,
-	                    _react2.default.createElement(
-	                        _reactBootstrap.Row,
-	                        null,
-	                        _react2.default.createElement(
-	                            _reactBootstrap.Col,
-	                            { lg: 8 },
+	                if (this.state.data.length === 0) {
+	                    return 'No topic Selected';
+	                } else {
+	                    return this.state.data.map(function (metricInfo) {
+	                        return _react2.default.createElement(
+	                            _reactBootstrap.ListGroupItem,
+	                            null,
 	                            _react2.default.createElement(
-	                                _reactBootstrap.Checkbox,
-	                                { onChange: _this2.handleCheckBox.bind(_this2, metricInfo.name, metricInfo.type) },
-	                                metricInfo.name
-	                            )
-	                        ),
-	                        _react2.default.createElement(
-	                            _reactBootstrap.Col,
-	                            { lg: 4 },
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'pull-right text-muted small' },
+	                                _reactBootstrap.Row,
+	                                null,
 	                                _react2.default.createElement(
-	                                    'em',
-	                                    null,
-	                                    metricInfo.type
+	                                    _reactBootstrap.Col,
+	                                    { lg: 8 },
+	                                    _react2.default.createElement(
+	                                        _reactBootstrap.Checkbox,
+	                                        { onChange: _this2.handleCheckBox.bind(_this2, metricInfo.name, metricInfo.type) },
+	                                        metricInfo.name
+	                                    )
+	                                ),
+	                                _react2.default.createElement(
+	                                    _reactBootstrap.Col,
+	                                    { lg: 4 },
+	                                    _react2.default.createElement(
+	                                        'div',
+	                                        { className: 'pull-right text-muted small' },
+	                                        _react2.default.createElement(
+	                                            'em',
+	                                            null,
+	                                            metricInfo.type
+	                                        )
+	                                    )
 	                                )
 	                            )
-	                        )
-	                    )
-	                );
-	            });
+	                        );
+	                    });
+	                }
+	            }.bind(this);
 
 	            return _react2.default.createElement(
 	                _reactLoader2.default,
@@ -78288,7 +78330,7 @@
 	                _react2.default.createElement(
 	                    _reactBootstrap.ListGroup,
 	                    null,
-	                    listNodes
+	                    listNodes()
 	                )
 	            );
 	        }
@@ -79373,6 +79415,26 @@
 	                                        'Password'
 	                                    ),
 	                                    _react2.default.createElement(_reactBootstrap.FormControl, { type: 'password', value: this.props.pass })
+	                                ),
+	                                _react2.default.createElement(
+	                                    _reactBootstrap.FormGroup,
+	                                    { controlId: 'formControlsRole' },
+	                                    _react2.default.createElement(
+	                                        _reactBootstrap.ControlLabel,
+	                                        null,
+	                                        'Role'
+	                                    ),
+	                                    _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', value: this.props.role })
+	                                ),
+	                                _react2.default.createElement(
+	                                    _reactBootstrap.FormGroup,
+	                                    { controlId: 'formControlsDefaultTopic' },
+	                                    _react2.default.createElement(
+	                                        _reactBootstrap.ControlLabel,
+	                                        null,
+	                                        'Default Topic'
+	                                    ),
+	                                    _react2.default.createElement(_reactBootstrap.FormControl, { type: 'text', value: this.props.defaultTopic })
 	                                )
 	                            )
 	                        )
@@ -79778,14 +79840,15 @@
 	            });
 	        }
 	    }, {
-	        key: 'updateRoleUser',
-	        value: function updateRoleUser(username, role) {
+	        key: 'updateUser',
+	        value: function updateUser(username, field, value) {
 	            return (0, _axios2.default)({
 	                method: 'PUT',
 	                url: _config2.default.BASE_URL_LOCAL + '/api/users',
 	                headers: { 'Access-Control-Allow-Origin': 'http://localhost:8081', 'Access-Control-Allow-Credentials': 'true' },
 	                data: { username: username,
-	                    role: role
+	                    field: field,
+	                    value: value
 	                }
 	            });
 	        }
@@ -79973,9 +80036,21 @@
 
 	var _UsersTableActions2 = _interopRequireDefault(_UsersTableActions);
 
+	var _TopicService = __webpack_require__(635);
+
+	var _TopicService2 = _interopRequireDefault(_TopicService);
+
 	var _UserRoleDropdown = __webpack_require__(657);
 
 	var _UserRoleDropdown2 = _interopRequireDefault(_UserRoleDropdown);
+
+	var _DefaultTopicDropdown = __webpack_require__(658);
+
+	var _DefaultTopicDropdown2 = _interopRequireDefault(_DefaultTopicDropdown);
+
+	var _MultipleRequestsService = __webpack_require__(659);
+
+	var _MultipleRequestsService2 = _interopRequireDefault(_MultipleRequestsService);
 
 	var _reactLoader = __webpack_require__(537);
 
@@ -80004,6 +80079,7 @@
 
 	        _this.state = {
 	            data: _this.getDataState(),
+	            topicsData: _this.getTopicsDataState(),
 	            isLoaded: _this.getLoadedState()
 	        };
 	        _this._onChange = _this._onChange.bind(_this);
@@ -80016,6 +80092,11 @@
 	            return _UsersTableStore2.default.data;
 	        }
 	    }, {
+	        key: 'getTopicsDataState',
+	        value: function getTopicsDataState() {
+	            return _UsersTableStore2.default.topicsData;
+	        }
+	    }, {
 	        key: 'getLoadedState',
 	        value: function getLoadedState() {
 	            return _UsersTableStore2.default.isLoaded;
@@ -80026,11 +80107,13 @@
 	            _UsersTableStore2.default.addChangeListener(this._onChange);
 
 	            if (this.state.data.length === 0) {
-	                _UserService2.default.getAllUsers().then(function (response) {
-	                    console.log(response.data);
-	                    _UsersTableActions2.default.getData(response.data.users);
-	                }, function (error) {
-	                    console.error(JSON.stringify(error));
+	                var requests = [_UserService2.default.getAllUsers(), _TopicService2.default.getTopics()];
+	                _MultipleRequestsService2.default.getTwoRequests(requests).then(function (responses) {
+	                    var dataArray = responses.map(function (r) {
+	                        return r.data;
+	                    });
+	                    dataArray[1].topicInfo.unshift({ topic: 'None' });
+	                    _UsersTableActions2.default.getData(dataArray[0].users, dataArray[1].topicInfo);
 	                });
 	            }
 	        }
@@ -80043,13 +80126,15 @@
 	        key: '_onChange',
 	        value: function _onChange() {
 	            this.setState({ data: this.getDataState() });
+	            this.setState({ topicsData: this.getTopicsDataState() });
 	            this.setState({ isLoaded: this.getLoadedState() });
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            var _this2 = this;
 
-	            var usersNodes = this.state.data.map(function (user) {
+	            var usersNodes = this.state.data.map(function (user, index) {
 	                return _react2.default.createElement(
 	                    'tr',
 	                    { key: user._id },
@@ -80061,12 +80146,21 @@
 	                    _react2.default.createElement(
 	                        'td',
 	                        null,
-	                        _react2.default.createElement(_UserRoleDropdown2.default, { role: user.roles, username: user.username })
+	                        _react2.default.createElement(_UserRoleDropdown2.default, { role: user.roles, index: index, username: user.username })
 	                    ),
 	                    _react2.default.createElement(
 	                        'td',
 	                        null,
 	                        user.cloudUsername
+	                    ),
+	                    _react2.default.createElement(
+	                        'td',
+	                        null,
+	                        _react2.default.createElement(_DefaultTopicDropdown2.default, { topics: _this2.state.topicsData,
+	                            username: user.username,
+	                            defaultTopic: user.defaultTopic,
+	                            index: index
+	                        })
 	                    )
 	                );
 	            });
@@ -80100,6 +80194,11 @@
 	                                    'th',
 	                                    null,
 	                                    'User Cloud'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'th',
+	                                    null,
+	                                    'Default Topic'
 	                                )
 	                            )
 	                        ),
@@ -80158,6 +80257,7 @@
 	            return _this._registerToActions.bind(_this);
 	        });
 	        _this._data = [];
+	        _this._topicsData = [];
 	        _this._isLoaded = false;
 	        return _this;
 	    }
@@ -80166,13 +80266,27 @@
 	        key: '_registerToActions',
 	        value: function _registerToActions(action) {
 	            switch (action.actionType) {
-	                case 'USERS_GET':
+	                case 'USER_DEFAULT_TOPIC_UPDATED':
+	                    console.log(action.index);
+	                    console.log(this.data[action.index][action.field]);
+	                    this._data[action.index][action.field] = action.value;
+	                    this.emitChange();
+	                    break;
+	                case 'USER_ROLES_UPDATED':
+	                    console.log(action.index);
+	                    console.log(this._data[action.index][action.field]);
+	                    this._data[action.index][action.field] = action.value;
+	                    this.emitChange();
+	                    break;
+	                case 'DATA_USERS_GET':
 	                    this._data = action.data;
+	                    this._topicsData = action.topicsData;
 	                    this._isLoaded = true;
 	                    this.emitChange();
 	                    break;
 	                case 'LOGOUT_USER':
 	                    this._data = [];
+	                    this._topicsData = [];
 	                    this._isLoaded = false;
 	                    this.emitChange();
 	                    break;
@@ -80184,6 +80298,11 @@
 	        key: 'data',
 	        get: function get() {
 	            return this._data;
+	        }
+	    }, {
+	        key: 'topicsData',
+	        get: function get() {
+	            return this._topicsData;
 	        }
 	    }, {
 	        key: 'isLoaded',
@@ -80214,10 +80333,28 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.default = {
-	    getData: function getData(data) {
+	    getData: function getData(data, topicsData) {
 	        _AppDispatcher2.default.dispatch({
-	            actionType: 'USERS_GET',
-	            data: data
+	            actionType: 'DATA_USERS_GET',
+	            data: data,
+	            topicsData: topicsData
+	        });
+	    },
+
+	    updateUser: function updateUser(index, field, value) {
+	        _AppDispatcher2.default.dispatch({
+	            actionType: 'USER_ROLES_UPDATED',
+	            index: index,
+	            field: field,
+	            value: value
+	        });
+	    },
+	    updateUserDefaultTopic: function updateUserDefaultTopic(index, field, value) {
+	        _AppDispatcher2.default.dispatch({
+	            actionType: 'USER_DEFAULT_TOPIC_UPDATED',
+	            index: index,
+	            field: field,
+	            value: value
 	        });
 	    }
 
@@ -80245,6 +80382,10 @@
 	var _UserService = __webpack_require__(652);
 
 	var _UserService2 = _interopRequireDefault(_UserService);
+
+	var _UsersTableActions = __webpack_require__(656);
+
+	var _UsersTableActions2 = _interopRequireDefault(_UsersTableActions);
 
 	var _AlertCustomActions = __webpack_require__(526);
 
@@ -80281,16 +80422,19 @@
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
 	            if (this.state.selectedValue == '') {
-	                this.setState({ selectedValue: this.props.role });
+	                this.setState({ selectedValue: this.props.role });;
 	            }
 	        }
 	    }, {
 	        key: 'updateUserRole',
 	        value: function updateUserRole(role) {
-	            _UserService2.default.updateRoleUser(this.props.username, role).then(function (response) {
+	            var _this2 = this;
+
+	            _UserService2.default.updateUser(this.props.username, 'roles', role).then(function (response) {
 	                var alertOptions = { style: 'success',
 	                    strongMsg: 'User',
 	                    message: 'User updated successfuly!' };
+	                _UsersTableActions2.default.updateUser(_this2.props.index, 'roles', role);
 	                _AlertCustomActions2.default.setAlertOn(alertOptions);
 	            }, function (error) {
 	                console.error(JSON.stringify(error));
@@ -80299,32 +80443,20 @@
 	    }, {
 	        key: 'handleSelectedValue',
 	        value: function handleSelectedValue(selectedValue) {
-	            switch (selectedValue) {
-	                case 'Client':
-	                    this.setState({ selectedValue: selectedValue });
-	                    this.updateUserRole(selectedValue);
-	                    break;
-	                case 'Manager':
-	                    this.setState({ selectedValue: selectedValue });
-	                    this.updateUserRole(selectedValue);
-	                    break;
-	                case 'Admin':
-	                    this.setState({ selectedValue: selectedValue });
-	                    this.updateUserRole(selectedValue);
-	                    break;
 
-	            }
+	            this.setState({ selectedValue: selectedValue });
+	            this.updateUserRole(selectedValue);
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            var _this2 = this;
+	            var _this3 = this;
 
 	            var values = ['Client', 'Manager', 'Admin'];
 	            var menuItems = values.map(function (value, key) {
 	                return _react2.default.createElement(
 	                    _reactBootstrap.MenuItem,
-	                    { key: key, eventKey: key, onClick: _this2.handleSelectedValue.bind(_this2, value) },
+	                    { key: key, eventKey: key, onClick: _this3.handleSelectedValue.bind(_this3, value) },
 	                    value
 	                );
 	            });
@@ -80341,6 +80473,158 @@
 	}(_react2.default.Component);
 
 	exports.default = UserRoleDropdown;
+
+/***/ },
+/* 658 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _UserService = __webpack_require__(652);
+
+	var _UserService2 = _interopRequireDefault(_UserService);
+
+	var _UsersTableActions = __webpack_require__(656);
+
+	var _UsersTableActions2 = _interopRequireDefault(_UsersTableActions);
+
+	var _AlertCustomActions = __webpack_require__(526);
+
+	var _AlertCustomActions2 = _interopRequireDefault(_AlertCustomActions);
+
+	var _reactBootstrap = __webpack_require__(239);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by alexei on 04/07/16.
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+	var DefaultTopicDropdown = function (_React$Component) {
+	    _inherits(DefaultTopicDropdown, _React$Component);
+
+	    function DefaultTopicDropdown() {
+	        _classCallCheck(this, DefaultTopicDropdown);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(DefaultTopicDropdown).call(this));
+
+	        _this.state = {
+	            selectedValue: ''
+	        };
+	        return _this;
+	    }
+
+	    _createClass(DefaultTopicDropdown, [{
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            console.log(this.props.topics);
+	            if (this.state.selectedValue == '') {
+	                this.setState({ selectedValue: this.props.defaultTopic });
+	            }
+	        }
+	    }, {
+	        key: 'updateUserDefaultTopic',
+	        value: function updateUserDefaultTopic(topic) {
+	            var _this2 = this;
+
+	            _UserService2.default.updateUser(this.props.username, 'defaultTopic', topic).then(function (response) {
+	                var alertOptions = { style: 'success',
+	                    strongMsg: 'User',
+	                    message: 'User Default Topic updated successfuly!' };
+	                _UsersTableActions2.default.updateUserDefaultTopic(_this2.props.index, 'defaultTopic', topic);
+	                _AlertCustomActions2.default.setAlertOn(alertOptions);
+	            }, function (error) {
+	                console.error(JSON.stringify(error));
+	            });
+	        }
+	    }, {
+	        key: 'handleSelectedValue',
+	        value: function handleSelectedValue(selectedValue) {
+	            this.setState({ selectedValue: selectedValue });
+	            this.updateUserDefaultTopic(selectedValue);
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var _this3 = this;
+
+	            var menuItems = this.props.topics.map(function (value, index) {
+
+	                return _react2.default.createElement(
+	                    _reactBootstrap.MenuItem,
+	                    { key: index, eventKey: index, onClick: _this3.handleSelectedValue.bind(_this3, value.topic) },
+	                    value.topic
+	                );
+	            });
+
+	            return _react2.default.createElement(
+	                _reactBootstrap.DropdownButton,
+	                { bsSize: 'xsmall', title: this.state.selectedValue, id: 'dropdown-size-extra-small' },
+	                menuItems
+	            );
+	        }
+	    }]);
+
+	    return DefaultTopicDropdown;
+	}(_react2.default.Component);
+
+	exports.default = DefaultTopicDropdown;
+
+/***/ },
+/* 659 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Created by alexei on 04/07/16.
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+	var _axios = __webpack_require__(505);
+
+	var _axios2 = _interopRequireDefault(_axios);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var MultipleRequestsService = function () {
+	    function MultipleRequestsService() {
+	        _classCallCheck(this, MultipleRequestsService);
+	    }
+
+	    _createClass(MultipleRequestsService, [{
+	        key: "getTwoRequests",
+	        value: function getTwoRequests(requests) {
+	            return _axios2.default.all(requests);
+	        }
+	    }]);
+
+	    return MultipleRequestsService;
+	}();
+
+	exports.default = new MultipleRequestsService();
 
 /***/ }
 /******/ ]);

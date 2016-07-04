@@ -12,6 +12,7 @@ router.post('/',function(req,res,next){
         .select('password')
         .select('cloudPassword')
         .select('cloudUsername')
+        .select('defaultTopic')
         .select('roles')
         .exec(function(err,user){
 
@@ -28,7 +29,8 @@ router.post('/',function(req,res,next){
                     res.json({
                         role: user.roles,
                         cloudPass: user.cloudPassword,
-                        cloudUser: user.cloudUsername
+                        cloudUser: user.cloudUsername,
+                        defaultTopic: user.defaultTopic
                     });
                 }
 

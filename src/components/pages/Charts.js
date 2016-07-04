@@ -40,7 +40,7 @@ export default AuthenticatedComponent( class Charts extends React.Component {
                     <Col lg={6}>
                         <Panel header="Topics">
                             <div className="panel-body-custom">
-                                <TopicList />
+                                <TopicList  defaultTopic={this.props.defaultTopic}/>
                             </div>
                         </Panel>
                     </Col>

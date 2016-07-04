@@ -46,6 +46,14 @@ export default AuthenticatedComponent( class Charts extends React.Component {
                                     <ControlLabel>Password</ControlLabel>
                                     <FormControl type="password" value={this.props.pass} />
                                 </FormGroup>
+                                <FormGroup controlId="formControlsRole">
+                                    <ControlLabel>Role</ControlLabel>
+                                    <FormControl type="text" value={this.props.role} />
+                                </FormGroup>
+                                <FormGroup controlId="formControlsDefaultTopic">
+                                    <ControlLabel>Default Topic</ControlLabel>
+                                    <FormControl type="text" value={this.props.defaultTopic} />
+                                </FormGroup>
                             </form>
                         </Panel>
                     </Col>

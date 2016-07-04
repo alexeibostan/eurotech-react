@@ -33,19 +33,6 @@ export default class MetricList extends React.Component{
 
     componentDidMount() {
         MetricListStore.addChangeListener(this._onChange);
-        if (this.state.data.length === 0){
-            var topic = 'demo_PCN/+/#';
-            MetricService.getMetrics(topic).then(
-                (response) =>{
-                    MetricActions.getDataMetric(response.data.metricInfo);
-                    MectricChartActions.setTopicSelected(topic);
-                    console.log('MetricInfo Recived');
-                },
-                (error) => { console.error(JSON.stringify(error)); }
-            );
-        }
-
-
 
     }
 
@@ -59,25 +46,34 @@ export default class MetricList extends React.Component{
     }
 
     render(){
-        var listNodes = this.state.data.map((metricInfo) =>{
-            return (
-                <ListGroupItem >
-                    <Row>
-                        <Col lg={8} >
-                            <Checkbox onChange={this.handleCheckBox.bind(this,metricInfo.name,metricInfo.type)}>{metricInfo.name}</Checkbox>
-                        </Col>
-                        <Col lg={4} >
-                            <div className="pull-right text-muted small"><em>{metricInfo.type}</em></div>
-                        </Col>
-                    </Row>
-                </ListGroupItem>
-            )
-        });
+        var listNodes = function() {
+            if (this.state.data.length === 0) {
+                return 'No topic Selected'
+            }
+
+            else {return this.state.data.map((metricInfo) => {
+                    return (
+                        <ListGroupItem >
+                            <Row>
+                                <Col lg={8}>
+                                    <Checkbox onChange={this.handleCheckBox.bind(this,metricInfo.name,metricInfo.type)}>
+                                        {metricInfo.name}
+                                    </Checkbox>
+                                </Col>
+                                <Col lg={4}>
+                                    <div className="pull-right text-muted small"><em>{metricInfo.type}</em></div>
+                                </Col>
+                            </Row>
+                        </ListGroupItem>
+                    )
+                });
+            }
+        }.bind(this);
 
         return (
             <Loader loaded={this.state.isLoaded}>
                 <ListGroup>
-                    {listNodes}
+                    {listNodes()}
                 </ListGroup>
             </Loader>
         )
