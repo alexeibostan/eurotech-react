@@ -41,6 +41,10 @@ class MetricChartStrore extends BaseStore {
                 this._isLoaded = true;
                 this.emitChange();
                 break;
+            case 'DATA_CHART_LIVE_GET':
+                this._data = action.data;
+                this.emitChange();
+                break;
             case 'DATA_CHART_CLICK':
                 this._isLoaded = false;
                 this.emitChange();

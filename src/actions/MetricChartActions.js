@@ -11,6 +11,12 @@ export default {
             data: data
         });
     },
+    getLiveDataMetricChart: (data) => {
+        AppDistpatcher.dispatch({
+            actionType: 'DATA_CHART_LIVE_GET',
+            data: data
+        });
+    },
     incrementOffset:() => {
         AppDistpatcher.dispatch({
             actionType: 'INCREMENT_OFFSET'

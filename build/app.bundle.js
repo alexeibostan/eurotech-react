@@ -78117,6 +78117,12 @@
 	            data: data
 	        });
 	    },
+	    getLiveDataMetricChart: function getLiveDataMetricChart(data) {
+	        _AppDispatcher2.default.dispatch({
+	            actionType: 'DATA_CHART_LIVE_GET',
+	            data: data
+	        });
+	    },
 	    incrementOffset: function incrementOffset() {
 	        _AppDispatcher2.default.dispatch({
 	            actionType: 'INCREMENT_OFFSET'
@@ -78490,6 +78496,7 @@
 	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MetricChart).call(this));
 
 	        _this.state = {
+	            intervalId: false,
 	            chartData: _this.getDataState(),
 	            isLoaded: _this.getLoadedState(),
 	            topic: _this.getTopicState(),
@@ -78568,7 +78575,7 @@
 	        value: function getDate(time) {
 	            var date = new Date();
 	            date.setTime(time);
-	            return date.getMonth() + 1 + "-" + date.getDate() + "-" + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
+	            return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
 	        }
 	    }, {
 	        key: 'getNextData',
@@ -78619,6 +78626,41 @@
 	                }, function (error) {
 	                    console.error(JSON.stringify(error));
 	                });
+	            }
+	        }
+	    }, {
+	        key: 'liveData',
+	        value: function liveData() {
+	            var _this3 = this;
+
+	            var alertOptions = { style: 'success', strongMsg: 'Live Chart', message: 'Live Chart is started, update every 5 seconds!' };
+	            if (!this.state.intervalId) {
+	                var requestData;
+	                var intervalId;
+
+	                (function () {
+	                    var nowDateMs = Date.now();
+
+	                    requestData = function requestData() {
+	                        _MetricService2.default.getMetricValuesByTimestamp(_MetricChartStrore2.default.topic, _MetricChartStrore2.default.metric, _MetricChartStrore2.default.metricType, nowDateMs).then(function (response) {
+	                            console.log(JSON.stringify(response.data) + ' real_data ' + response.data.limitExceeded);
+	                            _MetricChartActions2.default.getLiveDataMetricChart(response.data);
+	                        }, function (error) {
+	                            console.error(JSON.stringify(error));
+	                        });
+	                    };
+
+	                    intervalId = setInterval(requestData, 5000);
+
+	                    _this3.setState({ intervalId: intervalId });
+	                    _AlertCustomActions2.default.setAlertOn(alertOptions);
+	                })();
+	            } else {
+	                clearInterval(this.state.intervalId);
+	                this.setState({ intervalId: false });
+	                alertOptions.style = 'info';
+	                alertOptions.message = 'Live Chart stopped!';
+	                _AlertCustomActions2.default.setAlertOn(alertOptions);
 	            }
 	        }
 	    }, {
@@ -78802,6 +78844,11 @@
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'pull-right' },
+	                            _react2.default.createElement(
+	                                _reactBootstrap.Button,
+	                                { onClick: this.liveData.bind(this), bsSize: 'xsmall' },
+	                                'Toggle Live Chart'
+	                            ),
 	                            _react2.default.createElement(_RangeDropdown2.default, null),
 	                            _react2.default.createElement(
 	                                _reactBootstrap.Button,
@@ -78901,6 +78948,10 @@
 	                case 'DATA_CHART_GET':
 	                    this._data = action.data;
 	                    this._isLoaded = true;
+	                    this.emitChange();
+	                    break;
+	                case 'DATA_CHART_LIVE_GET':
+	                    this._data = action.data;
 	                    this.emitChange();
 	                    break;
 	                case 'DATA_CHART_CLICK':

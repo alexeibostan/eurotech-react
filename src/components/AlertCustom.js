@@ -31,6 +31,7 @@ export default class AlertCustom extends React.Component {
 
     componentDidMount(){
         AlertCustomStore.addChangeListener(this._onChange);
+        
     }
 
     componentWillUnmount() {

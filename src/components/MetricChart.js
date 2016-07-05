@@ -17,6 +17,7 @@ export  default class MetricChart extends React.Component {
     constructor() {
         super();
         this.state = {
+            intervalId: false,
             chartData: this.getDataState(),
             isLoaded: this.getLoadedState(),
             topic: this.getTopicState(),
@@ -87,7 +88,7 @@ export  default class MetricChart extends React.Component {
     getDate(time){
         var date = new Date();
         date.setTime(time);
-        return  (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear()+ " " +
+        return  date.getDate() + "-" + (date.getMonth() + 1)   + "-" + date.getFullYear()+ " " +
             date.getHours() + ":" + date.getMinutes();
     }
 
@@ -146,6 +147,37 @@ export  default class MetricChart extends React.Component {
                 }
             )
         }
+    }
+
+    liveData(){
+        var alertOptions = {style:'success',strongMsg:'Live Chart',message:'Live Chart is started, update every 5 seconds!'};
+        if(!this.state.intervalId) {
+            const nowDateMs = Date.now();
+            var requestData = function (){
+                MetricService.getMetricValuesByTimestamp(MetricChartStore.topic,
+                    MetricChartStore.metric,
+                    MetricChartStore.metricType,nowDateMs).then(
+                    (response) => {
+                        console.log(JSON.stringify(response.data) + ' real_data ' + response.data.limitExceeded);
+                        MetricChartActions.getLiveDataMetricChart(response.data);
+
+                    },
+                    (error) => {
+                        console.error(JSON.stringify(error));
+                    });
+            };
+            var intervalId = setInterval(requestData, 5000);
+            this.setState({intervalId: intervalId});
+            AlertCustomActions.setAlertOn(alertOptions);
+        }
+        else {
+            clearInterval(this.state.intervalId);
+            this.setState({intervalId:false});
+            alertOptions.style= 'info';
+            alertOptions.message = 'Live Chart stopped!';
+            AlertCustomActions.setAlertOn(alertOptions);
+        }
+
     }
 
     componentDidMount() {
@@ -279,6 +311,7 @@ export  default class MetricChart extends React.Component {
             return (
                 <Panel header={<span><i class="fa fa-area-chart" aria-hidden="true"/> Topic: {this.state.topic}
                      <div className="pull-right">
+                      <Button onClick={this.liveData.bind(this)} bsSize="xsmall" >Toggle Live Chart</Button>
                       <RangeDropDown/>
                       <Button onClick={this.requestData.bind(this)} bsSize="xsmall" >Show Chart</Button>
                   </div>
